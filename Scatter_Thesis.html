@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scatter Plot</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="TmapData.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.1/chroma.min.js"></script>
+    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="box">
+            <svg id="chart"></svg>
+        </div>    
+        <div class="box">
+            <svg id="heatmap"></svg>
+        </div>
+    </div>
+
+    <button id="changeColorButton"> Confidence</button>
+    <button id="changeColorButton2"> Classes</button>
+
+    <script>
+    // Create SVG container for TMAP 
+    const width = 900;
+    const height = 900;
+    const svg = d3.select('#chart')
+        .attr('width', width)
+        .attr('height', height);
+
+    const imageWidth = 900; 
+    const imageHeight = 900; 
+    svg.append('image')
+        .attr('href', 'scatter_plot-2.svg') // Path to your SVG image
+        .attr('width', imageWidth)
+        .attr('height', imageHeight);
+
+    const heatwidth = 1000; 
+    const svg2 = d3.select('#heatmap')
+        .attr('width', heatwidth)
+        .attr('height', height);
+
+    function updateSize() {
+
+        var width_ref = window.innerWidth * 0.48; 
+        var height_ref = window.innerHeight * 0.9; 
+        svg.attr("width", width_ref)
+            .attr("height", height_ref);
+        svg2.attr("width", width_ref)
+            .attr("height", height_ref);
+
+    }
+    updateSize(); 
+    window.addEventListener("resize", updateSize);
+
+// Load data from CSV
+d3.json('metab.json', {delimiter: ';'}).then(function(data) {
+
+    // Create a div for the tooltip
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0);
+
+    let arrayLength = data.length; 
+   
+    // Find the maximum float value
+    const maxFloat_X = findMaxFloat(map_data.Chemical_Space.x);
+    const maxFloat_Y = findMaxFloat(map_data.Chemical_Space.y);
+
+    // Create scales
+    const xScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => parseFloat(d.Chemical_Space_x)))
+        .range([0, width]);
+
+        const yScale = d3.scaleLinear()
+        .domain(d3.extent(data, d => parseFloat(d.Chemical_Space_y)))
+        .range([height, 0]);
+
+    let myScale_X = d3.scaleLinear()
+        .domain([0, maxFloat_X])
+        .range([0, 900]);
+
+    let myScale_Y = d3.scaleLinear()
+        .domain([0, maxFloat_Y])
+        .range([0, 900]);
+
+    var circles = svg.selectAll('circles')
+        .data(data) 
+        .enter()
+        .append('circle');
+
+    var circleAttributes = circles
+        .attr('cx', function(d){return findCoordinateX(d.Smiles_GNPS_results, map_data);})
+        .attr('cy', function(d){return findCoordinateY(d.Smiles_GNPS_results, map_data);})
+        .attr('r', 8) 
+        .style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        .on("mouseover", function(event, d) {
+
+            var mouseX = event.pageX;
+            var mouseY = event.pageY;
+            
+            var currentIndex = d.index;
+
+            circles.filter(function(e) {
+
+                return e.index === currentIndex;
+
+            })
+            .style('strokewidth', 8)
+            .style('stroke', 'red')
+
+            var currentIndex = d.index;
+
+            rectangles.filter(function(e) {
+                    return e.index === currentIndex;
+                })
+        .style("stroke", "red") // Change border color to red
+        .style("stroke-width", 4); // Increase border width
+
+       tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltip.html("Spectrum ID:" + d.spectrum_ids_ms2query_results + "<br> Mass:" + d.MassDiff_GNPS_results + "<br> SuperClass: " + d.cf_superclass_ms2query_results) // Show data value in the tooltip
+
+        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+
+        var svgSmiles = svgContainer.append("svg")
+            .attr("id", "svgExample")
+            .attr("width", 200)
+            .attr("height", 200);
+
+        let moleculeOptions = {};
+        let reactionOptions = {};
+        let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+        sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'dark');
+
+        tooltip.style("left", (mouseX + 10) + "px") 
+            .style("top", (mouseY + 10) + "px"); 
+        })
+        .on("mouseout", function() {
+
+            circles.style('stroke', 'none')
+            rectangles.style("stroke", "black")
+            .style("stroke-width", 1);
+
+            tooltip.transition()
+            .duration(500)
+            .style("opacity", 0)
+
+            });
+
+    svg2.append('text')
+        .attr("x", 20)
+        .attr("y", 30)
+        .attr("font-size", "20px")
+        .attr("font-family", "Arial")
+        .attr("fill", "black")
+        .text("Sample 1");
+
+    svg2.append('text')
+        .attr("x", 20 + (svg2.attr("width") / 3))
+        .attr("y", 30)
+        .attr("font-size", "20px")
+        .attr("font-family", "Arial")
+        .attr("fill", "black")
+        .text("Sample 2");
+
+    svg2.append('text')
+        .attr("x", 20 + (svg2.attr("width") / 3)*2)
+        .attr("y", 30)
+        .attr("font-size", "20px")
+        .attr("font-family", "Arial")
+        .attr("fill", "black")
+        .text("Sample 3");
+
+
+    var rectangles = svg2.selectAll('rects')
+        .data(data)
+        .enter()
+        .append('rect');
+
+    var changeColorButton = document.getElementById("changeColorButton");
+    changeColorButton.addEventListener("click", function() {
+
+        rectangles.style("fill", "red");
+        rectangles.style("fill", function(d){
+
+            return scale(d.ms2query_model_prediction_ms2query_results)
+
+        })
+        circles.style("fill", function(d){
+
+            return scale(d.ms2query_model_prediction_ms2query_results)
+
+        })
+        
+    });
+
+    var changeColorButton2 = document.getElementById("changeColorButton2");
+    changeColorButton2.addEventListener("click", function() {
+
+        rectangles.style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        circles.style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        
+    });
+
+    var rectangleAttributes = rectangles
+        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
+        .attr("y", function(d) { return 40 + d.index * 20; }) // Top-left corner y position
+        .attr("width", (svg2.attr("width") / 3) -40)
+        .attr("height", 16)
+        .style("stroke", "black") // Border color
+        .style("stroke-width", 1) // Border width
+        .style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        .on("mouseover", function(event, d) {
+
+            var mouseX = event.pageX;
+            var mouseY = event.pageY;
+            
+            var currentIndex = d.index;
+
+            circles.filter(function(e) {
+
+                return e.index === currentIndex;
+
+            })
+            .style('strokewidth', 4)
+            .style('stroke', 'red')
+
+            var currentIndex = d.index;
+            rectangles.filter(function(e) {
+                    return e.index === currentIndex;
+                })
+        .style("stroke", "red") // Change border color to red
+        .style("stroke-width", 4); // Increase border width
+
+        // Show tooltip
+       tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltip.html("Spectrum ID:" + d.spectrum_ids_ms2query_results + "<br> Mass:" + d.MassDiff_GNPS_results + "<br> Class: " + d.cf_class_ms2query_results) // Show data value in the tooltip
+            .style("left", (mouseX + 10) + "px") // Position tooltip horizontally
+            .style("top", (mouseY + 10) + "px"); // Position tooltip vertically
+
+            // Create a container element inside the tooltip for the SVG
+        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+
+// Create the SVG element and append it to the container
+var svgSmiles = svgContainer.append("svg")
+    .attr("id", "svgExample")
+    .attr("width", 200)
+    .attr("height", 200);
+
+// Initialize SmiDrawer and draw the molecule
+let moleculeOptions = {};
+let reactionOptions = {};
+let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'dark');
+        })
+        .on("mouseout", function() {
+
+            circles.style('stroke', 'none')
+            rectangles.style("stroke", "black") // Reset border color to black
+                .style("stroke-width", 1); // Reset border width
+
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });   
+
+});
+//["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]
+var colorMap = {
+    "Organic nitrogen compounds": chroma('#1f77b4'),
+    "Lipids and lipid-like molecules": chroma('#ff7f0e'),
+    "Benzenoids": chroma('#2ca02c'),
+    "Organic oxygen compounds": chroma('#d62728'),
+    "Organic acids and derivatives": chroma('#9467bd'),
+    "Phenylpropanoids and polyketides": chroma('#8c564b'),
+    "Alkaloids and derivatives": chroma('#e377c2'),
+    "Nucleosides, nucleotides, and analogues": chroma('#7f7f7f'),
+    "Organoheterocyclic compounds": chroma('#bcbd22'),
+
+    "default": "white"
+};
+
+var scale = chroma.scale(['yellow', 'red', 'black']);
+
+function findCoordinateX(smiles, Tmap){
+
+    let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
+    let coordinate = Tmap.Chemical_Space.x[index]; 
+    return coordinate; 
+
+}
+
+function findCoordinateY(smiles, Tmap){
+
+    let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
+    let coordinate = Tmap.Chemical_Space.y[index]; 
+    return coordinate; 
+
+}
+
+function findMaxFloat(arr) {
+  let max = -Infinity;
+  for (let i = 0; i < arr.length; i++) {
+    if (typeof arr[i] === 'number' && !isNaN(arr[i])) {
+      if (arr[i] > max) {
+        max = arr[i];
+      }
+    }
+  }
+  return max;
+}
+
+javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+    </script>
+</body>
+</html>
