@@ -16,8 +16,8 @@
         <div class="box">
             <svg id="chart"></svg>
         </div>    
-        <div class="box">
-            <svg id="heatmap"></svg>
+        <div class="box" id="svgContainer_matrix">
+            <svg id="heatmap" class="content"></svg>
         </div>
     </div>
 
@@ -25,7 +25,7 @@
     <button id="changeColorButton2"> Classes</button>
 
     <script>
-    // Create SVG container for TMAP 
+
     const width = 900;
     const height = 900;
     const svg = d3.select('#chart')
@@ -35,12 +35,14 @@
     const imageWidth = 900; 
     const imageHeight = 900; 
     svg.append('image')
-        .attr('href', 'scatter_plot-2.svg') // Path to your SVG image
+        .attr('href', 'scatter_plot-2.svg')
         .attr('width', imageWidth)
         .attr('height', imageHeight);
 
+    var svgContainer = d3.select("#svgContainer_matrix");
+
     const heatwidth = 1000; 
-    const svg2 = d3.select('#heatmap')
+    var svg2 = svgContainer.select('#heatmap')
         .attr('width', heatwidth)
         .attr('height', height);
 
@@ -58,8 +60,37 @@
     window.addEventListener("resize", updateSize);
 
 // Load data from CSV
-d3.json('metab.json', {delimiter: ';'}).then(function(data) {
+d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
+    // Define variables for panning
+    var isPanning = false;
+    var initialMouseX, initialMouseY;
+    var viewBoxX = 0;
+    var viewBoxY = 0;
+
+    svg.on("mousedown", function(event) {
+    isPanning = true;
+    initialMouseX = event.pageX;
+    initialMouseY = event.pageY;
+    svg.style("cursor", "grabbing");
+    });
+
+    svg.on("mousemove", function(event) {
+    if (isPanning) {
+        var dx = event.pageX - initialMouseX;
+        var dy = event.pageY - initialMouseY;
+        viewBoxX -= dx;
+        viewBoxY -= dy;
+        svg.attr("viewBox", viewBoxX + " " + viewBoxY + " " + svg.attr("width") + " " + svg.attr("height"));
+        initialMouseX = event.pageX;
+        initialMouseY = event.pageY;
+    }
+});
+
+svg.on("mouseup", function() {
+    isPanning = false;
+    svg.style("cursor", "auto");
+});
     // Create a div for the tooltip
     var tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -123,22 +154,32 @@ d3.json('metab.json', {delimiter: ';'}).then(function(data) {
         .style("stroke", "red") // Change border color to red
         .style("stroke-width", 4); // Increase border width
 
-       tooltip.transition()
+        // Show tooltip
+        tooltip.transition()
             .duration(200)
             .style("opacity", .9);
-        tooltip.html("Spectrum ID:" + d.spectrum_ids_ms2query_results + "<br> Mass:" + d.MassDiff_GNPS_results + "<br> SuperClass: " + d.cf_superclass_ms2query_results) // Show data value in the tooltip
+        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                        "<br> Mass: " + d.MassDiff_GNPS_results + 
+                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                        "<br> Class: " + d.cf_class_ms2query_results)
+            .style("left", (mouseX + 10) + "px")
+            .style("top", (mouseY + 10) + "px"); 
 
+            // Create a container element inside the tooltip for the SVG
         var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-        var svgSmiles = svgContainer.append("svg")
-            .attr("id", "svgExample")
-            .attr("width", 200)
-            .attr("height", 200);
+var svgSmiles = svgContainer.append("svg")
+    .attr("id", "svgExample")
+    .attr("width", 300)
+    .attr("height", 200);
 
-        let moleculeOptions = {};
-        let reactionOptions = {};
-        let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-        sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'dark');
+// Initialize SmiDrawer and draw the molecule
+let moleculeOptions = {};
+let reactionOptions = {};
+let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
         tooltip.style("left", (mouseX + 10) + "px") 
             .style("top", (mouseY + 10) + "px"); 
@@ -180,10 +221,7 @@ d3.json('metab.json', {delimiter: ';'}).then(function(data) {
         .text("Sample 3");
 
 
-    var rectangles = svg2.selectAll('rects')
-        .data(data)
-        .enter()
-        .append('rect');
+
 
     var changeColorButton = document.getElementById("changeColorButton");
     changeColorButton.addEventListener("click", function() {
@@ -213,6 +251,11 @@ d3.json('metab.json', {delimiter: ';'}).then(function(data) {
         })
         
     });
+
+    var rectangles = svg2.selectAll('rects')
+        .data(data)
+        .enter()
+        .append('rect');
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
@@ -250,24 +293,28 @@ d3.json('metab.json', {delimiter: ';'}).then(function(data) {
        tooltip.transition()
             .duration(200)
             .style("opacity", .9);
-        tooltip.html("Spectrum ID:" + d.spectrum_ids_ms2query_results + "<br> Mass:" + d.MassDiff_GNPS_results + "<br> Class: " + d.cf_class_ms2query_results) // Show data value in the tooltip
-            .style("left", (mouseX + 10) + "px") // Position tooltip horizontally
-            .style("top", (mouseY + 10) + "px"); // Position tooltip vertically
+        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                        "<br> Mass: " + d.MassDiff_GNPS_results + 
+                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                        "<br> Class: " + d.cf_class_ms2query_results)
+            .style("left", (mouseX + 10) + "px")
+            .style("top", (mouseY + 10) + "px"); 
 
             // Create a container element inside the tooltip for the SVG
         var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-// Create the SVG element and append it to the container
 var svgSmiles = svgContainer.append("svg")
     .attr("id", "svgExample")
-    .attr("width", 200)
+    .attr("width", 300)
     .attr("height", 200);
 
 // Initialize SmiDrawer and draw the molecule
 let moleculeOptions = {};
 let reactionOptions = {};
 let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'dark');
+sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         })
         .on("mouseout", function() {
 
@@ -295,6 +342,7 @@ var colorMap = {
 
     "default": "white"
 };
+
 
 var scale = chroma.scale(['yellow', 'red', 'black']);
 
