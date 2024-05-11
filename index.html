@@ -22,7 +22,7 @@
     </div>
 
     <div class="fixed-bottom-right">
-        
+
         <svg class="legend" width="600" height="200"></svg>
 
     </div>
@@ -32,6 +32,8 @@
 
     <button id="sortHeat"> Sort after confidence</button>
     <button id="sortClass"> Sort after index </button>
+
+    <div id="popup" class="hidden">The substance you clicked is copied to your clipboard</div>
 
     <script>
 
@@ -68,6 +70,7 @@ var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules
         // Append colored rectangles to represent categories
         legendItems.append("rect")
             .attr("x", 10)
+            .attr("y", 10)
             .attr("width", 18)
             .attr("height", 18)
             .style("fill", function(d) { return colorScale(d); });
@@ -75,11 +78,12 @@ var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules
         // Append text labels
         legendItems.append("text")
             .attr("x", 40)
-            .attr("y", 9)
+            .attr("y", 19)
             .attr("dy", ".35em")
             .style("text-anchor", "start")
+            .style("font-size", "16px")
             .text(function(d) { return d; });
-
+            
     const width = 900;
     const height = 900;
     const svg = d3.select('#chart')
@@ -492,7 +496,7 @@ return colorMap[d.cf_superclass_ms2query_results] || colorMap['default'];
             .attr("fill", "black")
             .text("Sample 3");
 
-        var rectangles = svg2.selectAll('rects')
+    var rectangles = svg2.selectAll('rects')
         .data(data)
         .enter()
         .append('rect');
@@ -585,53 +589,53 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         })
         .on("mouseover", function(event, d) {
 
-            var mouseX = event.pageX;
-            var mouseY = event.pageY;
-            
-            var currentIndex = d.index;
+                        var mouseX = event.pageX;
+                        var mouseY = event.pageY;
+                        
+                        var currentIndex = d.index;
 
-            circles.filter(function(e) {
+                        circles.filter(function(e) {
 
-                return e.index === currentIndex;
+                            return e.index === currentIndex;
 
-            })
-            .style('strokewidth', 4)
-            .style('stroke', 'red')
+                        })
+                        .style('strokewidth', 4)
+                        .style('stroke', 'red')
 
-            var currentIndex = d.index;
-            rectangles.filter(function(e) {
-                    return e.index === currentIndex;
-                })
-        .style("stroke", "red") // Change border color to red
-        .style("stroke-width", 4); // Increase border width
+                        var currentIndex = d.index;
+                        rectangles.filter(function(e) {
+                                return e.index === currentIndex;
+                            })
+                    .style("stroke", "red") // Change border color to red
+                    .style("stroke-width", 4); // Increase border width
 
-        // Show tooltip
-       tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                        "<br> Mass: " + d.MassDiff_GNPS_results + 
-                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                        "<br> Class: " + d.cf_class_ms2query_results)
-            .style("left", (mouseX + 10) + "px")
-            .style("top", (mouseY + 10) + "px"); 
+                    // Show tooltip
+                tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
+                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                                    "<br> Class: " + d.cf_class_ms2query_results)
+                        .style("left", (mouseX + 10) + "px")
+                        .style("top", (mouseY + 10) + "px"); 
 
-            // Create a container element inside the tooltip for the SVG
-        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+                        // Create a container element inside the tooltip for the SVG
+                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-var svgSmiles = svgContainer.append("svg")
-    .attr("id", "svgExample")
-    .attr("width", 300)
-    .attr("height", 200);
+            var svgSmiles = svgContainer.append("svg")
+                .attr("id", "svgExample")
+                .attr("width", 300)
+                .attr("height", 200);
 
-// Initialize SmiDrawer and draw the molecule
-let moleculeOptions = {};
-let reactionOptions = {};
-let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-        })
+            // Initialize SmiDrawer and draw the molecule
+            let moleculeOptions = {};
+            let reactionOptions = {};
+            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+                    })
         .on("mouseout", function() {
 
             circles.style('stroke', 'none')
@@ -641,9 +645,40 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
             tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
-        });   
+        })
+        .on("click", function(event, d){
+
+            var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                    " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                    " Mass: " + d.MassDiff_GNPS_results + 
+                                    " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                    " Super Class: "+d.cf_superclass_ms2query_results+ 
+                                    " Class: " + d.cf_class_ms2query_results;
+            
+            navigator.clipboard.writeText(textToCopy)
+
+            .then(() => {
+            // Show popup
+            var popup = d3.select("#popup");
+            popup.classed("hidden", false);
+
+            // Hide popup after 2 seconds
+            setTimeout(function() {
+                popup.classed("hidden", true);
+            }, 2000);
+        })
+        .catch(err => {
+            console.error('Failed to copy text to clipboard:', err);
+        });
+
+
+
+        })  
+        
+        
 
 });
+
 //["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]
 var colorMap = {
     "Organic nitrogen compounds": chroma('#1f77b4'),
