@@ -21,10 +21,64 @@
         </div>
     </div>
 
+    <div class="fixed-bottom-right">
+        
+        <svg class="legend" width="600" height="200"></svg>
+
+    </div>
+
     <button id="changeColorButton"> Confidence</button>
     <button id="changeColorButton2"> Classes</button>
 
+    <button id="sortHeat"> Sort after confidence</button>
+    <button id="sortClass"> Sort after index </button>
+
     <script>
+
+
+var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
+            "Organic acids and derivatives", "Phenylpropanoids and polyketides", "Alkaloids and derivatives", "Nucleosides, nucleotides, and analogues",
+            "Organoheterocyclic compounds"];
+        var colorScale = d3.scaleOrdinal()
+            .domain(legendData)
+            .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22']); // Example colors
+
+        // Create SVG container for legend
+        var legendWidth = 600; // Adjust width as needed
+        var legendHeight = 200; // Adjust height as needed
+
+        var legend = d3.select(".legend")
+            .attr("width", legendWidth)
+            .attr("height", legendHeight);
+
+        // Append border
+        legend.append("rect")
+            .attr("width", legendWidth)
+            .attr("height", legendHeight)
+            .style("fill", "none")
+            .style("stroke", "black")
+            .style("stroke-width", 1);
+
+        // Add legend items
+        var legendItems = legend.selectAll("g")
+            .data(legendData)
+            .enter().append("g")
+            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+
+        // Append colored rectangles to represent categories
+        legendItems.append("rect")
+            .attr("x", 10)
+            .attr("width", 18)
+            .attr("height", 18)
+            .style("fill", function(d) { return colorScale(d); });
+
+        // Append text labels
+        legendItems.append("text")
+            .attr("x", 40)
+            .attr("y", 9)
+            .attr("dy", ".35em")
+            .style("text-anchor", "start")
+            .text(function(d) { return d; });
 
     const width = 900;
     const height = 900;
@@ -84,13 +138,14 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
         svg.attr("viewBox", viewBoxX + " " + viewBoxY + " " + svg.attr("width") + " " + svg.attr("height"));
         initialMouseX = event.pageX;
         initialMouseY = event.pageY;
-    }
-});
+        }
+    });
 
-svg.on("mouseup", function() {
-    isPanning = false;
-    svg.style("cursor", "auto");
-});
+    svg.on("mouseup", function() {
+        isPanning = false;
+        svg.style("cursor", "auto");
+    });
+
     // Create a div for the tooltip
     var tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -220,9 +275,6 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         .attr("fill", "black")
         .text("Sample 3");
 
-
-
-
     var changeColorButton = document.getElementById("changeColorButton");
     changeColorButton.addEventListener("click", function() {
 
@@ -250,6 +302,270 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
             return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
         })
         
+    });
+
+    var changeSortingButton = document.getElementById("sortHeat");
+    changeSortingButton.addEventListener("click", function(){
+
+        changeColorButton.addEventListener("click", function() {
+
+                rectangles.style("fill", function(d){
+
+                    return scale(d.ms2query_model_prediction_ms2query_results)
+
+                })
+                circles.style("fill", function(d){
+
+                    return scale(d.ms2query_model_prediction_ms2query_results)
+
+                })
+
+        });
+
+        changeColorButton2.addEventListener("click", function() {
+
+            rectangles.style("fill", function(d) { 
+                return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+            })
+            circles.style("fill", function(d) { 
+                return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+            })
+
+});
+
+        svg2.selectAll("*").remove();
+
+        svg2.append('text')
+        .attr("x", 20)
+        .attr("y", 30)
+        .attr("font-size", "20px")
+        .attr("font-family", "Arial")
+        .attr("fill", "black")
+        .text("Sample 1");
+
+        svg2.append('text')
+            .attr("x", 20 + (svg2.attr("width") / 3))
+            .attr("y", 30)
+            .attr("font-size", "20px")
+            .attr("font-family", "Arial")
+            .attr("fill", "black")
+            .text("Sample 2");
+
+        svg2.append('text')
+            .attr("x", 20 + (svg2.attr("width") / 3)*2)
+            .attr("y", 30)
+            .attr("font-size", "20px")
+            .attr("font-family", "Arial")
+            .attr("fill", "black")
+            .text("Sample 3");
+
+        var rectangles = svg2.selectAll('rects')
+        .data(data)
+        .enter()
+        .append('rect');
+
+    var rectangleAttributes = rectangles
+        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
+        .attr("y", function(d) { return 40 + d.heat_index * 20; })
+        .attr("width", (svg2.attr("width") / 3) -40)
+        .attr("height", 16)
+        .style("stroke", "black") 
+        .style("stroke-width", 1) 
+        .style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        .on("mouseover", function(event, d) {
+
+            var mouseX = event.pageX;
+            var mouseY = event.pageY;
+            
+            var currentIndex = d.index;
+
+            circles.filter(function(e) {
+
+                return e.index === currentIndex;
+
+            })
+            .style('strokewidth', 4)
+            .style('stroke', 'red')
+
+            var currentIndex = d.index;
+            rectangles.filter(function(e) {
+                    return e.index === currentIndex;
+                })
+        .style("stroke", "red") // Change border color to red
+        .style("stroke-width", 4); // Increase border width
+
+        // Show tooltip
+       tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                        "<br> Mass: " + d.MassDiff_GNPS_results + 
+                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                        "<br> Class: " + d.cf_class_ms2query_results)
+            .style("left", (mouseX + 10) + "px")
+            .style("top", (mouseY + 10) + "px"); 
+
+            // Create a container element inside the tooltip for the SVG
+        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+
+var svgSmiles = svgContainer.append("svg")
+    .attr("id", "svgExample")
+    .attr("width", 300)
+    .attr("height", 200);
+
+// Initialize SmiDrawer and draw the molecule
+let moleculeOptions = {};
+let reactionOptions = {};
+let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+        })
+        .on("mouseout", function() {
+
+            circles.style('stroke', 'none')
+            rectangles.style("stroke", "black") // Reset border color to black
+                .style("stroke-width", 1); // Reset border width
+
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        })
+
+    }); 
+
+
+    var sortingButton2 = document.getElementById("sortClass"); 
+    sortingButton2.addEventListener("click", function(){
+
+        changeColorButton.addEventListener("click", function() {
+
+rectangles.style("fill", function(d){
+
+    return scale(d.ms2query_model_prediction_ms2query_results)
+
+})
+circles.style("fill", function(d){
+
+    return scale(d.ms2query_model_prediction_ms2query_results)
+
+})
+
+});
+
+changeColorButton2.addEventListener("click", function() {
+
+rectangles.style("fill", function(d) { 
+return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+circles.style("fill", function(d) { 
+return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+
+});
+
+        svg2.selectAll("*").remove();
+
+        svg2.append('text')
+        .attr("x", 20)
+        .attr("y", 30)
+        .attr("font-size", "20px")
+        .attr("font-family", "Arial")
+        .attr("fill", "black")
+        .text("Sample 1");
+
+        svg2.append('text')
+            .attr("x", 20 + (svg2.attr("width") / 3))
+            .attr("y", 30)
+            .attr("font-size", "20px")
+            .attr("font-family", "Arial")
+            .attr("fill", "black")
+            .text("Sample 2");
+
+        svg2.append('text')
+            .attr("x", 20 + (svg2.attr("width") / 3)*2)
+            .attr("y", 30)
+            .attr("font-size", "20px")
+            .attr("font-family", "Arial")
+            .attr("fill", "black")
+            .text("Sample 3");
+
+        var rectangles = svg2.selectAll('rects')
+        .data(data)
+        .enter()
+        .append('rect');
+
+    var rectangleAttributes = rectangles
+        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
+        .attr("y", function(d) { return 40 + d.index * 20; }) // Top-left corner y position
+        .attr("width", (svg2.attr("width") / 3) -40)
+        .attr("height", 16)
+        .style("stroke", "black") // Border color
+        .style("stroke-width", 1) // Border width
+        .style("fill", function(d) { 
+            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        .on("mouseover", function(event, d) {
+
+            var mouseX = event.pageX;
+            var mouseY = event.pageY;
+            
+            var currentIndex = d.index;
+
+            circles.filter(function(e) {
+
+                return e.index === currentIndex;
+
+            })
+            .style('strokewidth', 4)
+            .style('stroke', 'red')
+
+            var currentIndex = d.index;
+            rectangles.filter(function(e) {
+                    return e.index === currentIndex;
+                })
+        .style("stroke", "red") // Change border color to red
+        .style("stroke-width", 4); // Increase border width
+
+        // Show tooltip
+       tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                        "<br> Mass: " + d.MassDiff_GNPS_results + 
+                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                        "<br> Class: " + d.cf_class_ms2query_results)
+            .style("left", (mouseX + 10) + "px")
+            .style("top", (mouseY + 10) + "px"); 
+
+            // Create a container element inside the tooltip for the SVG
+        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+
+var svgSmiles = svgContainer.append("svg")
+    .attr("id", "svgExample")
+    .attr("width", 300)
+    .attr("height", 200);
+
+// Initialize SmiDrawer and draw the molecule
+let moleculeOptions = {};
+let reactionOptions = {};
+let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+        })
+        .on("mouseout", function() {
+
+            circles.style('stroke', 'none')
+            rectangles.style("stroke", "black") // Reset border color to black
+                .style("stroke-width", 1); // Reset border width
+
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
     });
 
     var rectangles = svg2.selectAll('rects')
@@ -342,7 +658,6 @@ var colorMap = {
 
     "default": "white"
 };
-
 
 var scale = chroma.scale(['yellow', 'red', 'black']);
 

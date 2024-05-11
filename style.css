@@ -38,3 +38,14 @@
         padding: 10px;
         font-size: 20px;
   }
+
+
+  .fixed-bottom-right {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 9999; /* Ensures it's above other content */
+    /* Optionally, you can add styles for background, padding, etc. */
+    background-color: #ffffff;
+    padding: 10px;
+}
