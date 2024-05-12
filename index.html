@@ -27,15 +27,32 @@
 
     </div>
 
-    <button id="changeColorButton"> Confidence</button>
-    <button id="changeColorButton2"> Classes</button>
+    <form>  
+        
+        <legend>Color-Scheme</legend>
 
-    <button id="sortHeat"> Sort after confidence</button>
-    <button id="sortClass"> Sort after index </button>
+        <input type="radio" id="option1" name="choice" value="option1" checked>
+        <label for="option1">Superclass</label><br>
+  
+        <input type="radio" id="option2" name="choice" value="option2">
+        <label for="option2">Confidence</label><br>
 
+    </form>
+
+    <form>  
+        
+        <legend>Sorting</legend>
+
+        <input type="radio" id="optionSort1" name="choice" value="option1" checked>
+        <label for="option1">Default</label><br>
+  
+        <input type="radio" id="optionSort2" name="choice" value="option2">
+        <label for="option2">Confidence</label><br>
+
+    </form>
     <div id="popup" class="hidden">The substance you clicked is copied to your clipboard</div>
 
-    <script>
+<script>
 
 
 var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
@@ -46,7 +63,7 @@ var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules
             .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22']); // Example colors
 
         // Create SVG container for legend
-        var legendWidth = 600; // Adjust width as needed
+        var legendWidth = 500; // Adjust width as needed
         var legendHeight = 200; // Adjust height as needed
 
         var legend = d3.select(".legend")
@@ -279,7 +296,7 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         .attr("fill", "black")
         .text("Sample 3");
 
-    var changeColorButton = document.getElementById("changeColorButton");
+    var changeColorButton = document.getElementById("option2");
     changeColorButton.addEventListener("click", function() {
 
         rectangles.style("fill", "red");
@@ -296,7 +313,7 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         
     });
 
-    var changeColorButton2 = document.getElementById("changeColorButton2");
+    var changeColorButton2 = document.getElementById("option1");
     changeColorButton2.addEventListener("click", function() {
 
         rectangles.style("fill", function(d) { 
@@ -308,7 +325,14 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         
     });
 
-    var changeSortingButton = document.getElementById("sortHeat");
+
+    
+    var changeSortingButton = document.getElementById("optionSort2");
+
+    // Hieer glaube ich 
+
+
+
     changeSortingButton.addEventListener("click", function(){
 
         changeColorButton.addEventListener("click", function() {
@@ -328,12 +352,12 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
         changeColorButton2.addEventListener("click", function() {
 
-            rectangles.style("fill", function(d) { 
-                return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-            })
-            circles.style("fill", function(d) { 
-                return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-            })
+                rectangles.style("fill", function(d) { 
+                    return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+                })
+                circles.style("fill", function(d) { 
+                    return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+                })
 
 });
 
@@ -440,45 +464,49 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
     }); 
 
-
-    var sortingButton2 = document.getElementById("sortClass"); 
+    var sortingButton2 = document.getElementById("optionSort1"); 
     sortingButton2.addEventListener("click", function(){
 
-        changeColorButton.addEventListener("click", function() {
+            changeColorButton.addEventListener("click", function() {
 
-rectangles.style("fill", function(d){
+                rectangles.style("fill", function(d){
 
-    return scale(d.ms2query_model_prediction_ms2query_results)
+                return scale(d.ms2query_model_prediction_ms2query_results)
 
-})
-circles.style("fill", function(d){
+            })
+            circles.style("fill", function(d){
 
-    return scale(d.ms2query_model_prediction_ms2query_results)
+                return scale(d.ms2query_model_prediction_ms2query_results)
 
-})
+            })
 
-});
+            });
 
-changeColorButton2.addEventListener("click", function() {
+        changeColorButton2.addEventListener("click", function() {
 
-rectangles.style("fill", function(d) { 
-return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-circles.style("fill", function(d) { 
-return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
+        rectangles.style("fill", function(d) { 
+        return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
+        circles.style("fill", function(d) { 
+        return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+        })
 
-});
+        });
+
+
+
+
+
 
         svg2.selectAll("*").remove();
 
         svg2.append('text')
-        .attr("x", 20)
-        .attr("y", 30)
-        .attr("font-size", "20px")
-        .attr("font-family", "Arial")
-        .attr("fill", "black")
-        .text("Sample 1");
+            .attr("x", 20)
+            .attr("y", 30)
+            .attr("font-size", "20px")
+            .attr("font-family", "Arial")
+            .attr("fill", "black")
+            .text("Sample 1");
 
         svg2.append('text')
             .attr("x", 20 + (svg2.attr("width") / 3))
@@ -671,12 +699,8 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
             console.error('Failed to copy text to clipboard:', err);
         });
 
-
-
         })  
         
-        
-
 });
 
 //["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]
