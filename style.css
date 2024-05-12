@@ -1,17 +1,19 @@
+body {
+
+    height: 100%;
+}
+
 #chart {
     border: 2px solid black; /* Define border width and color */
     background-color: white;
 }
 
-
 #heatmap {
     border: 2px solid black; /* Define border width and color */
 }
 
-#svg-container {
-    width: 800px; /* Set width as needed */
-    height: 600px; /* Set height as needed */
-    overflow: scroll; /* or overflow: scroll; */
+#svg-container_matrix {
+    overflow: scroll;
   }
   .container {
     width: 100%; /* Ensures the container spans the full width of its parent */
@@ -35,6 +37,7 @@
         border: 2px solid #797979;
         border-radius: 5px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        z-index: 500; /* Ensures it's above other content */
         padding: 10px;
         font-size: 16px;
   }
@@ -44,7 +47,7 @@
     position: fixed;
     bottom: 0;
     right: 0;
-    z-index: 9999; /* Ensures it's above other content */
+    z-index: 500; /* Ensures it's above other content */
     /* Optionally, you can add styles for background, padding, etc. */
     background-color: #ffffff;
     padding: 10px;
@@ -65,3 +68,7 @@
 .hidden {
     opacity: 0;
 }
+
+
+
+    

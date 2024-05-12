@@ -15,16 +15,16 @@
     <div class="container">
         <div class="box">
             <svg id="chart"></svg>
-        </div>    
-        <div class="box" id="svgContainer_matrix">
+        </div>
+        <div class="box" id="svgContainer_matrix" style="overflow: auto;">
+            <div id="svg2Container" style="height: 1200px; overflow-y: scroll;">
             <svg id="heatmap" class="content"></svg>
+        </div>
         </div>
     </div>
 
     <div class="fixed-bottom-right">
-
         <svg class="legend" width="600" height="200"></svg>
-
     </div>
 
     <form>  
@@ -112,10 +112,14 @@ var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules
 
     var svgContainer = d3.select("#svgContainer_matrix");
 
-    const heatwidth = 1000; 
-    var svg2 = svgContainer.select('#heatmap')
-        .attr('width', heatwidth)
-        .attr('height', height);
+    // Get the dimensions of the svgContainer_matrix div
+const containerWidth = document.getElementById('svgContainer_matrix').offsetWidth;
+const containerHeight = document.getElementById('svgContainer_matrix').offsetHeight;
+
+// Set svg2 width and height to be larger than the container
+var svg2 = svgContainer.select('#heatmap')
+    .attr('width', containerWidth * 2) // Making it twice as wide
+    .attr('height', containerHeight * 2); // Making it twice as tall
 
     function updateSize() {
 
@@ -244,8 +248,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
 var svgSmiles = svgContainer.append("svg")
     .attr("id", "svgExample")
-    .attr("width", 300)
-    .attr("height", 200);
+    .attr("width", 200)
+    .attr("height", 150);
 
 // Initialize SmiDrawer and draw the molecule
 let moleculeOptions = {};
@@ -438,8 +442,8 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
 var svgSmiles = svgContainer.append("svg")
     .attr("id", "svgExample")
-    .attr("width", 300)
-    .attr("height", 200);
+    .attr("width", 200)
+    .attr("height", 150);
 
 // Initialize SmiDrawer and draw the molecule
 let moleculeOptions = {};
@@ -651,8 +655,8 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
             var svgSmiles = svgContainer.append("svg")
                 .attr("id", "svgExample")
-                .attr("width", 300)
-                .attr("height", 200);
+                .attr("width", 200)
+                .attr("height", 150);
 
             // Initialize SmiDrawer and draw the molecule
             let moleculeOptions = {};
