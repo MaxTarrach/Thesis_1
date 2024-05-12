@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scatter Plot</title>
+    <title>MuMeVIS</title>
 
     <link rel="stylesheet" href="style.css">
     <script src="https://d3js.org/d3.v6.min.js"></script>
@@ -30,10 +30,8 @@
     <form>  
         
         <legend>Color-Scheme</legend>
-
         <input type="radio" id="option1" name="choice" value="option1" checked>
         <label for="option1">Superclass</label><br>
-  
         <input type="radio" id="option2" name="choice" value="option2">
         <label for="option2">Confidence</label><br>
 
@@ -42,10 +40,8 @@
     <form>  
         
         <legend>Sorting</legend>
-
         <input type="radio" id="optionSort1" name="choice" value="option1" checked>
         <label for="option1">Default</label><br>
-  
         <input type="radio" id="optionSort2" name="choice" value="option2">
         <label for="option2">Confidence</label><br>
 
@@ -63,7 +59,7 @@ var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules
             .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22']); // Example colors
 
         // Create SVG container for legend
-        var legendWidth = 500; // Adjust width as needed
+        var legendWidth = 350; // Adjust width as needed
         var legendHeight = 200; // Adjust height as needed
 
         var legend = d3.select(".legend")
