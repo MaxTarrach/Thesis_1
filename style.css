@@ -12,9 +12,9 @@ body {
     border: 2px solid black; /* Define border width and color */
 }
 
-#svg-container_matrix {
-    overflow: scroll;
-  }
+#svg-Container_matrix {
+    overflow: hidden; /* Change to 'hidden' to hide overflow */
+}
   .container {
     width: 100%; /* Ensures the container spans the full width of its parent */
 }
@@ -51,6 +51,15 @@ body {
     padding: 10px;
 }
 
+.fixed-bottom-left {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 100; 
+    background-color: #ffffff;
+    padding: 10px;
+}
+
 #popup {
     position: fixed;
     top: 90%;
@@ -67,6 +76,10 @@ body {
     opacity: 0;
 }
 
+#svg2Container {
+    height: 100%; /* Adjust height as needed */
+    overflow: hidden; /* Change to 'hidden' to hide overflow */
+}
 
 
     
