@@ -37,18 +37,16 @@ body {
         border: 2px solid #797979;
         border-radius: 5px;
         box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        z-index: 500; /* Ensures it's above other content */
+        z-index: 500;
         padding: 10px;
         font-size: 16px;
   }
-
 
   .fixed-bottom-right {
     position: fixed;
     bottom: 0;
     right: 0;
-    z-index: 500; /* Ensures it's above other content */
-    /* Optionally, you can add styles for background, padding, etc. */
+    z-index: 500; 
     background-color: #ffffff;
     padding: 10px;
 }

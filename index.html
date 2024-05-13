@@ -230,47 +230,42 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
         .style("stroke", "red") // Change border color to red
         .style("stroke-width", 4); // Increase border width
 
-        // Show tooltip
         tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                        "<br> Mass: " + d.MassDiff_GNPS_results + 
-                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                        "<br> Class: " + d.cf_class_ms2query_results)
-            .style("left", (mouseX + 10) + "px")
-            .style("top", (mouseY + 10) + "px"); 
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
+                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                                    "<br> Class: " + d.cf_class_ms2query_results)
+                        .style("left", (mouseX + 10) + "px")
+                        .style("top", (mouseY + 10) + "px"); 
 
-            // Create a container element inside the tooltip for the SVG
-        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+                        // Create a container element inside the tooltip for the SVG
+                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-var svgSmiles = svgContainer.append("svg")
-    .attr("id", "svgExample")
-    .attr("width", 200)
-    .attr("height", 150);
+            var svgSmiles = svgContainer.append("svg")
+                .attr("id", "svgExample")
+                .attr("width", 200)
+                .attr("height", 150);
 
-// Initialize SmiDrawer and draw the molecule
-let moleculeOptions = {};
-let reactionOptions = {};
-let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-
-        tooltip.style("left", (mouseX + 10) + "px") 
-            .style("top", (mouseY + 10) + "px"); 
-        })
+            // Initialize SmiDrawer and draw the molecule
+            let moleculeOptions = {};
+            let reactionOptions = {};
+            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+                    })
         .on("mouseout", function() {
 
             circles.style('stroke', 'none')
-            rectangles.style("stroke", "black")
-            .style("stroke-width", 1);
+            rectangles.style("stroke", "black") // Reset border color to black
+                .style("stroke-width", 1); // Reset border width
 
             tooltip.transition()
-            .duration(500)
-            .style("opacity", 0)
-
-            });
+                .duration(500)
+                .style("opacity", 0);
+        });
 
     svg2.append('text')
         .attr("x", 20)
@@ -394,9 +389,9 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-        .attr("y", function(d) { return 40 + d.heat_index * 20; })
+        .attr("y", function(d) { return 40 + d.heat_index * 16; })
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 16)
+        .attr("height", 12)
         .style("stroke", "black") 
         .style("stroke-width", 1) 
         .style("fill", function(d) { 
@@ -425,32 +420,32 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         .style("stroke-width", 4); // Increase border width
 
         // Show tooltip
-       tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                        "<br> Mass: " + d.MassDiff_GNPS_results + 
-                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                        "<br> Class: " + d.cf_class_ms2query_results)
-            .style("left", (mouseX + 10) + "px")
-            .style("top", (mouseY + 10) + "px"); 
+        tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
+                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                                    "<br> Class: " + d.cf_class_ms2query_results)
+                        .style("left", (mouseX + 10) + "px")
+                        .style("top", (mouseY + 10) + "px"); 
 
-            // Create a container element inside the tooltip for the SVG
-        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+                        // Create a container element inside the tooltip for the SVG
+                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-var svgSmiles = svgContainer.append("svg")
-    .attr("id", "svgExample")
-    .attr("width", 200)
-    .attr("height", 150);
+            var svgSmiles = svgContainer.append("svg")
+                .attr("id", "svgExample")
+                .attr("width", 200)
+                .attr("height", 150);
 
-// Initialize SmiDrawer and draw the molecule
-let moleculeOptions = {};
-let reactionOptions = {};
-let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-        })
+            // Initialize SmiDrawer and draw the molecule
+            let moleculeOptions = {};
+            let reactionOptions = {};
+            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+                    })
         .on("mouseout", function() {
 
             circles.style('stroke', 'none')
@@ -531,9 +526,9 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-        .attr("y", function(d) { return 40 + d.index * 20; }) // Top-left corner y position
+        .attr("y", function(d) { return 40 + d.index * 16; }) // Top-left corner y position
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 16)
+        .attr("height", 12)
         .style("stroke", "black") // Border color
         .style("stroke-width", 1) // Border width
         .style("fill", function(d) { 
@@ -561,33 +556,32 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
         .style("stroke", "red") // Change border color to red
         .style("stroke-width", 4); // Increase border width
 
-        // Show tooltip
-       tooltip.transition()
-            .duration(200)
-            .style("opacity", .9);
-        tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                        "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                        "<br> Mass: " + d.MassDiff_GNPS_results + 
-                        "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                        "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                        "<br> Class: " + d.cf_class_ms2query_results)
-            .style("left", (mouseX + 10) + "px")
-            .style("top", (mouseY + 10) + "px"); 
+        tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
+                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                                    "<br> Class: " + d.cf_class_ms2query_results)
+                        .style("left", (mouseX + 10) + "px")
+                        .style("top", (mouseY + 10) + "px"); 
 
-            // Create a container element inside the tooltip for the SVG
-        var svgContainer = tooltip.append("div").attr("class", "svg-container");
+                        // Create a container element inside the tooltip for the SVG
+                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-var svgSmiles = svgContainer.append("svg")
-    .attr("id", "svgExample")
-    .attr("width", 300)
-    .attr("height", 200);
+            var svgSmiles = svgContainer.append("svg")
+                .attr("id", "svgExample")
+                .attr("width", 200)
+                .attr("height", 150);
 
-// Initialize SmiDrawer and draw the molecule
-let moleculeOptions = {};
-let reactionOptions = {};
-let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-        })
+            // Initialize SmiDrawer and draw the molecule
+            let moleculeOptions = {};
+            let reactionOptions = {};
+            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+                    })
         .on("mouseout", function() {
 
             circles.style('stroke', 'none')
@@ -597,7 +591,7 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
             tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
-        });
+        })
     });
 
     var rectangles = svg2.selectAll('rects')
@@ -607,9 +601,9 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-        .attr("y", function(d) { return 40 + d.index * 20; }) // Top-left corner y position
+        .attr("y", function(d) { return 40 + d.index * 16; }) // Top-left corner y position
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 16)
+        .attr("height", 12)
         .style("stroke", "black") // Border color
         .style("stroke-width", 1) // Border width
         .style("fill", function(d) { 
@@ -637,18 +631,31 @@ sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
                     .style("stroke", "red") // Change border color to red
                     .style("stroke-width", 4); // Increase border width
 
-                    // Show tooltip
-                tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
-                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                                    "<br> Class: " + d.cf_class_ms2query_results)
-                        .style("left", (mouseX + 10) + "px")
-                        .style("top", (mouseY + 10) + "px"); 
+                    tooltip.transition()
+    .duration(200)
+    .style("opacity", .9);
+tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr + 
+             "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+             "<br> Mass: " + d.MassDiff_GNPS_results + 
+             "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results +
+             "<br> Super Class: " + d.cf_superclass_ms2query_results + 
+             "<br> Class: " + d.cf_class_ms2query_results)
+    .style("left", function() {
+        // Check if the cursor is in the right half of the screen
+        if (mouseX > window.innerWidth / 2) {
+            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+        } else {
+            return (mouseX + 10) + "px";
+        }
+    })
+    .style("top", function() {
+        // Check if the cursor is in the lower half of the screen
+        if (mouseY > window.innerHeight / 2) {
+            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+        } else {
+            return (mouseY + 10) + "px";
+        }
+    }); 
 
                         // Create a container element inside the tooltip for the SVG
                     var svgContainer = tooltip.append("div").attr("class", "svg-container");
