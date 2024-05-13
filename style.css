@@ -57,7 +57,11 @@ body {
     left: 0;
     z-index: 100; 
     background-color: #ffffff;
+    z-index: 500; 
     padding: 10px;
+    border: 1px solid black;
+    width: 200px;
+
 }
 
 #popup {
