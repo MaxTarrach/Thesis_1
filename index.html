@@ -211,6 +211,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
         .style("fill", function(d) { 
             return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
         })
+        .style('stroke', 'black') // Default border color
+        .style('stroke-width', 2) // Default border width
         .on("mouseover", function(event, d) {
 
             var mouseX = event.pageX;
@@ -262,7 +264,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                     })
         .on("mouseout", function() {
 
-            circles.style('stroke', 'none')
+            circles.style('stroke', 'black') // Default border color
+                .style('stroke-width', 2) // Default border width
             rectangles.style("stroke", "black") // Reset border color to black
                 .style("stroke-width", 1); // Reset border width
 
@@ -452,7 +455,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                     })
         .on("mouseout", function() {
 
-            circles.style('stroke', 'none')
+            circles.style('stroke', 'black') // Default border color
+                .style('stroke-width', 2)
             rectangles.style("stroke", "black") // Reset border color to black
                 .style("stroke-width", 1); // Reset border width
 
@@ -588,7 +592,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                     })
         .on("mouseout", function() {
 
-            circles.style('stroke', 'none')
+            circles.style('stroke', 'black') // Default border color
+                .style('stroke-width', 2)
             rectangles.style("stroke", "black") // Reset border color to black
                 .style("stroke-width", 1); // Reset border width
 
@@ -677,7 +682,8 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
                     })
         .on("mouseout", function() {
 
-            circles.style('stroke', 'none')
+            circles.style('stroke', 'black') // Default border color
+                .style('stroke-width', 2) // Default border width
             rectangles.style("stroke", "black") // Reset border color to black
                 .style("stroke-width", 1); // Reset border width
 
