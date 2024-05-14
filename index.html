@@ -16,10 +16,9 @@
         <div class="box">
             <svg id="chart"></svg>
         </div>
+
         <div class="box" id="svgContainer_matrix" style="overflow: hidden;">
-            <div id="svg2Container" >
-            <svg id="heatmap" class="content"></svg>
-        </div>
+                <svg id="heatmap" class="content"></svg>
         </div>
 
 
@@ -423,9 +422,9 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-        .attr("y", function(d) { return 40 + d.heat_index * 16; })
+        .attr("y", function(d) { return 40 + d.heat_index * 12; })
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 10)
+        .attr("height", 9)
         .style("stroke", "black") 
         .style("stroke-width", 1) 
         .style("fill", function(d) { 
@@ -597,9 +596,9 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-        .attr("y", function(d) { return 40 + d.index * 16; }) // Top-left corner y position
+        .attr("y", function(d) { return 40 + d.index * 12; }) // Top-left corner y position
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 10)
+        .attr("height", 9)
         .style("stroke", "black") // Border color
         .style("stroke-width", 1) // Border width
         .style("fill", function(d) { 
@@ -687,9 +686,9 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
     var rectangleAttributes = rectangles
         .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-        .attr("y", function(d) { return 40 + d.index * 14; })
+        .attr("y", function(d) { return 40 + d.index * 12; })
         .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 10)
+        .attr("height", 9)
         .style("stroke", "black")
         .style("stroke-width", 1)
         .style("fill", function(d) { 
