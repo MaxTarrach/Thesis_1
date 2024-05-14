@@ -27,7 +27,6 @@
         <svg class="legend" width="600" height="200"></svg>
     </div>
 
-
     <div class="fixed-bottom-left">
         <form>  
             
@@ -35,13 +34,13 @@
             <input type="radio" id="option1" name="choice" value="option1" checked>
             <label for="option1">Superclass</label><br>
             <input type="radio" id="option2" name="choice" value="option2">
-            <label for="option2">Confidence</label><br>
+            <label for="option2">Confidence in Analogue</label><br>
 
         </form>
 
         <form>  
             
-            <legend>Sort after:</legend>
+            <legend>Sort Matrix after:</legend>
             <input type="radio" id="optionSort1" name="choice" value="option1" checked>
             <label for="option1">Index</label><br>
             <input type="radio" id="optionSort2" name="choice" value="option2">
@@ -55,17 +54,17 @@
 
 <script>
 
-
-var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
+    //var scale = chroma.scale(['yellow', 'red', 'black']);
+    var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
             "Organic acids and derivatives", "Phenylpropanoids and polyketides", "Alkaloids and derivatives", "Nucleosides, nucleotides, and analogues",
-            "Organoheterocyclic compounds"];
-        var colorScale = d3.scaleOrdinal()
+            "Organoheterocyclic compounds", "Confidence = 1,0", "Confidence = 0,5", "Confidence = 0,0"];
+    var colorScale = d3.scaleOrdinal()
             .domain(legendData)
-            .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22']); // Example colors
+            .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', 'black', 'red', 'yellow']); // Example colors
 
         // Create SVG container for legend
         var legendWidth = 350; // Adjust width as needed
-        var legendHeight = 200; // Adjust height as needed
+        var legendHeight = 250; // Adjust height as needed
 
         var legend = d3.select(".legend")
             .attr("width", legendWidth)
@@ -272,6 +271,35 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
             tooltip.transition()
                 .duration(500)
                 .style("opacity", 0);
+        })
+
+        .on("click", function(event, d){
+
+        var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                " MassDiff: " + d.MassDiff_GNPS_results + 
+                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                " Super Class: " + d.cf_superclass_ms2query_results+ 
+                                " Class: " + d.cf_class_ms2query_results+
+                                " SMILES: " + d.smiles_ms2query_results+
+                                "InChIKey: " + d.inchikey_ms2query_results;
+
+        navigator.clipboard.writeText(textToCopy)
+
+        .then(() => {
+        // Show popup
+        var popup = d3.select("#popup");
+        popup.classed("hidden", false);
+
+        // Hide popup after 2 seconds
+        setTimeout(function() {
+            popup.classed("hidden", true);
+        }, 2000);
+        })
+        .catch(err => {
+        console.error('Failed to copy text to clipboard:', err);
+        });
+
         });
 
     svg2.append('text')
@@ -301,7 +329,6 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
     var changeColorButton = document.getElementById("option2");
     changeColorButton.addEventListener("click", function() {
 
-        rectangles.style("fill", "red");
         rectangles.style("fill", function(d){
 
             return scale(d.ms2query_model_prediction_ms2query_results)
@@ -436,8 +463,22 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                                     "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
                                     "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
                                     "<br> Class: " + d.cf_class_ms2query_results)
-                        .style("left", (mouseX + 10) + "px")
-                        .style("top", (mouseY + 10) + "px"); 
+                                    .style("left", function() {
+        
+        if (mouseX > window.innerWidth / 2) {
+            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+        } else {
+            return (mouseX + 10) + "px";
+        }
+    })
+    .style("top", function() {
+        
+        if (mouseY > window.innerHeight / 2) {
+            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+        } else {
+            return (mouseY + 10) + "px";
+        }
+    }); 
 
                         // Create a container element inside the tooltip for the SVG
                     var svgContainer = tooltip.append("div").attr("class", "svg-container");
@@ -464,8 +505,35 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                 .duration(500)
                 .style("opacity", 0);
         })
+        .on("click", function(event, d){
 
-    }); 
+            var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                " MassDiff: " + d.MassDiff_GNPS_results + 
+                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                " Super Class: " + d.cf_superclass_ms2query_results+ 
+                                " Class: " + d.cf_class_ms2query_results+
+                                " SMILES: " + d.smiles_ms2query_results+
+                                "InChIKey: " + d.inchikey_ms2query_results;
+
+
+                navigator.clipboard.writeText(textToCopy)
+
+                .then(() => {
+                // Show popup
+                var popup = d3.select("#popup");
+                popup.classed("hidden", false);
+
+                // Hide popup after 2 seconds
+                setTimeout(function() {
+                    popup.classed("hidden", true);
+                }, 2000);
+                })
+                .catch(err => {
+                console.error('Failed to copy text to clipboard:', err);
+                });
+
+                })}); 
 
     var sortingButton2 = document.getElementById("optionSort1"); 
     sortingButton2.addEventListener("click", function(){
@@ -495,11 +563,6 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
         })
 
         });
-
-
-
-
-
 
         svg2.selectAll("*").remove();
 
@@ -573,8 +636,22 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                                     "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
                                     "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
                                     "<br> Class: " + d.cf_class_ms2query_results)
-                        .style("left", (mouseX + 10) + "px")
-                        .style("top", (mouseY + 10) + "px"); 
+                                    .style("left", function() {
+        
+        if (mouseX > window.innerWidth / 2) {
+            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+        } else {
+            return (mouseX + 10) + "px";
+        }
+    })
+    .style("top", function() {
+        
+        if (mouseY > window.innerHeight / 2) {
+            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+        } else {
+            return (mouseY + 10) + "px";
+        }
+    }); 
 
                         // Create a container element inside the tooltip for the SVG
                     var svgContainer = tooltip.append("div").attr("class", "svg-container");
@@ -609,12 +686,12 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
         .append('rect');
 
     var rectangleAttributes = rectangles
-        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-        .attr("y", function(d) { return 40 + d.index * 14; }) // Top-left corner y position
+        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
+        .attr("y", function(d) { return 40 + d.index * 14; })
         .attr("width", (svg2.attr("width") / 3) -40)
         .attr("height", 10)
-        .style("stroke", "black") // Border color
-        .style("stroke-width", 1) // Border width
+        .style("stroke", "black")
+        .style("stroke-width", 1)
         .style("fill", function(d) { 
             return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
         })
@@ -637,8 +714,8 @@ d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
                         rectangles.filter(function(e) {
                                 return e.index === currentIndex;
                             })
-                    .style("stroke", "red") // Change border color to red
-                    .style("stroke-width", 4); // Increase border width
+                    .style("stroke", "red")
+                    .style("stroke-width", 4);
 
                     tooltip.transition()
     .duration(200)
@@ -650,7 +727,7 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
              "<br> Super Class: " + d.cf_superclass_ms2query_results + 
              "<br> Class: " + d.cf_class_ms2query_results)
     .style("left", function() {
-        // Check if the cursor is in the right half of the screen
+        
         if (mouseX > window.innerWidth / 2) {
             return (mouseX - tooltip.node().offsetWidth - 10) + "px";
         } else {
@@ -658,7 +735,7 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
         }
     })
     .style("top", function() {
-        // Check if the cursor is in the lower half of the screen
+        
         if (mouseY > window.innerHeight / 2) {
             return (mouseY - tooltip.node().offsetHeight - 10) + "px";
         } else {
@@ -666,15 +743,14 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
         }
     }); 
 
-                        // Create a container element inside the tooltip for the SVG
-                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
+                        
+            var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
             var svgSmiles = svgContainer.append("svg")
                 .attr("id", "svgExample")
                 .attr("width", 200)
                 .attr("height", 150);
 
-            // Initialize SmiDrawer and draw the molecule
             let moleculeOptions = {};
             let reactionOptions = {};
             let sd = new SmiDrawer(moleculeOptions, reactionOptions);
@@ -682,10 +758,10 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
                     })
         .on("mouseout", function() {
 
-            circles.style('stroke', 'black') // Default border color
-                .style('stroke-width', 2) // Default border width
-            rectangles.style("stroke", "black") // Reset border color to black
-                .style("stroke-width", 1); // Reset border width
+            circles.style('stroke', 'black') 
+                .style('stroke-width', 2) 
+            rectangles.style("stroke", "black") 
+                .style("stroke-width", 1); 
 
             tooltip.transition()
                 .duration(500)
@@ -694,11 +770,14 @@ tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr +
         .on("click", function(event, d){
 
             var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                    " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                    " Mass: " + d.MassDiff_GNPS_results + 
-                                    " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                    " Super Class: "+d.cf_superclass_ms2query_results+ 
-                                    " Class: " + d.cf_class_ms2query_results;
+                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                                " MassDiff: " + d.MassDiff_GNPS_results + 
+                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                                " Super Class: " + d.cf_superclass_ms2query_results+ 
+                                " Class: " + d.cf_class_ms2query_results+
+                                " SMILES: " + d.smiles_ms2query_results+
+                                "InChIKey: " + d.inchikey_ms2query_results;
+
             
             navigator.clipboard.writeText(textToCopy)
 
