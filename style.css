@@ -3,6 +3,11 @@ body {
     height: 100%;
 }
 
+label {
+
+font-size: 14px;
+}
+
 #chart {
     border: 2px solid black; /* Define border width and color */
     background-color: white;

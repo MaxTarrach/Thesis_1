@@ -10,6 +10,7 @@
     <script src="TmapData.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.1/chroma.min.js"></script>
     <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+    <script src="script.js"></script>
 </head>
 <body>
 
@@ -53,797 +54,798 @@
 
 <script>
 
-    //var scale = chroma.scale(['yellow', 'red', 'black']);
-    var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
-            "Organic acids and derivatives", "Phenylpropanoids and polyketides", "Alkaloids and derivatives", "Nucleosides, nucleotides, and analogues",
-            "Organoheterocyclic compounds", "Confidence = 1,0", "Confidence = 0,5", "Confidence = 0,0"];
-    var colorScale = d3.scaleOrdinal()
-            .domain(legendData)
-            .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', 'black', 'red', 'yellow']); // Example colors
+       //var scale = chroma.scale(['yellow', 'red', 'black']);
+   var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
+   "Organic acids and derivatives", "Phenylpropanoids and polyketides", "Alkaloids and derivatives", "Nucleosides, nucleotides, and analogues",
+   "Organoheterocyclic compounds", "Confidence = 1,0", "Confidence = 0,5", "Confidence = 0,0"];
+var colorScale = d3.scaleOrdinal()
+   .domain(legendData)
+   .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', 'black', 'red', 'yellow']); // Example colors
 
-        // Create SVG container for legend
-        var legendWidth = 350; // Adjust width as needed
-        var legendHeight = 250; // Adjust height as needed
+// Create SVG container for legend
+var legendWidth = 350; // Adjust width as needed
+var legendHeight = 250; // Adjust height as needed
 
-        var legend = d3.select(".legend")
-            .attr("width", legendWidth)
-            .attr("height", legendHeight);
+var legend = d3.select(".legend")
+   .attr("width", legendWidth)
+   .attr("height", legendHeight);
 
-        // Append border
-        legend.append("rect")
-            .attr("width", legendWidth)
-            .attr("height", legendHeight)
-            .style("fill", "none")
-            .style("stroke", "black")
-            .style("stroke-width", 1);
+// Append border
+legend.append("rect")
+   .attr("width", legendWidth)
+   .attr("height", legendHeight)
+   .style("fill", "none")
+   .style("stroke", "black")
+   .style("stroke-width", 1);
 
-        // Add legend items
-        var legendItems = legend.selectAll("g")
-            .data(legendData)
-            .enter().append("g")
-            .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+// Add legend items
+var legendItems = legend.selectAll("g")
+   .data(legendData)
+   .enter().append("g")
+   .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
 
-        // Append colored rectangles to represent categories
-        legendItems.append("rect")
-            .attr("x", 10)
-            .attr("y", 10)
-            .attr("width", 18)
-            .attr("height", 18)
-            .style("fill", function(d) { return colorScale(d); });
+// Append colored rectangles to represent categories
+legendItems.append("rect")
+   .attr("x", 10)
+   .attr("y", 10)
+   .attr("width", 18)
+   .attr("height", 18)
+   .style("fill", function(d) { return colorScale(d); });
 
-        // Append text labels
-        legendItems.append("text")
-            .attr("x", 40)
-            .attr("y", 19)
-            .attr("dy", ".35em")
-            .style("text-anchor", "start")
-            .style("font-size", "14px")
-            .text(function(d) { return d; });
-            
-    const width = 900;
-    const height = 900;
-    const svg = d3.select('#chart')
-        .attr('width', width)
-        .attr('height', height);
+// Append text labels
+legendItems.append("text")
+   .attr("x", 40)
+   .attr("y", 19)
+   .attr("dy", ".35em")
+   .style("text-anchor", "start")
+   .style("font-size", "14px")
+   .text(function(d) { return d; });
+   
+const width = 900;
+const height = 900;
+const svg = d3.select('#chart')
+.attr('width', width)
+.attr('height', height);
 
-    const imageWidth = 900; 
-    const imageHeight = 900; 
-    svg.append('image')
-        .attr('href', 'scatter_plot-2.svg')
-        .attr('width', imageWidth)
-        .attr('height', imageHeight);
+const imageWidth = 900; 
+const imageHeight = 900; 
+svg.append('image')
+.attr('href', 'scatter_plot-2.svg')
+.attr('width', imageWidth)
+.attr('height', imageHeight);
 
-    var svgContainer = d3.select("#svgContainer_matrix");
+var svgContainer = d3.select("#svgContainer_matrix");
 
-    // Get the dimensions of the svgContainer_matrix div
+// Get the dimensions of the svgContainer_matrix div
 const containerWidth = document.getElementById('svgContainer_matrix').offsetWidth;
 const containerHeight = document.getElementById('svgContainer_matrix').offsetHeight;
 
 var svg2 = svgContainer.select('#heatmap')
-    .attr('width', containerWidth) 
-    .attr('height', containerHeight); 
+.attr('width', containerWidth) 
+.attr('height', containerHeight); 
 
-    function updateSize() {
+function updateSize() {
 
-        var width_ref = window.innerWidth * 0.48; 
-        var height_ref = window.innerHeight * 0.9; 
-        svg.attr("width", width_ref)
-            .attr("height", height_ref);
-        svg2.attr("width", width_ref)
-            .attr("height", height_ref);
+var width_ref = window.innerWidth * 0.48; 
+var height_ref = window.innerHeight * 0.9; 
+svg.attr("width", width_ref)
+   .attr("height", height_ref);
+svg2.attr("width", width_ref)
+   .attr("height", height_ref);
 
-    }
-    updateSize(); 
-    window.addEventListener("resize", updateSize);
+}
+updateSize(); 
+window.addEventListener("resize", updateSize);
 
 // Load data from CSV
 d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
 
-    // Define variables for panning
-    var isPanning = false;
-    var initialMouseX, initialMouseY;
-    var viewBoxX = 0;
-    var viewBoxY = 0;
+// Define variables for panning
+var isPanning = false;
+var initialMouseX, initialMouseY;
+var viewBoxX = 0;
+var viewBoxY = 0;
 
-    svg.on("mousedown", function(event) {
-    isPanning = true;
-    initialMouseX = event.pageX;
-    initialMouseY = event.pageY;
-    svg.style("cursor", "grabbing");
-    });
+svg.on("mousedown", function(event) {
+isPanning = true;
+initialMouseX = event.pageX;
+initialMouseY = event.pageY;
+svg.style("cursor", "grabbing");
+});
 
-    svg.on("mousemove", function(event) {
-    if (isPanning) {
-        var dx = event.pageX - initialMouseX;
-        var dy = event.pageY - initialMouseY;
-        viewBoxX -= dx;
-        viewBoxY -= dy;
-        svg.attr("viewBox", viewBoxX + " " + viewBoxY + " " + svg.attr("width") + " " + svg.attr("height"));
-        initialMouseX = event.pageX;
-        initialMouseY = event.pageY;
-        }
-    });
+svg.on("mousemove", function(event) {
+if (isPanning) {
+var dx = event.pageX - initialMouseX;
+var dy = event.pageY - initialMouseY;
+viewBoxX -= dx;
+viewBoxY -= dy;
+svg.attr("viewBox", viewBoxX + " " + viewBoxY + " " + svg.attr("width") + " " + svg.attr("height"));
+initialMouseX = event.pageX;
+initialMouseY = event.pageY;
+}
+});
 
-    svg.on("mouseup", function() {
-        isPanning = false;
-        svg.style("cursor", "auto");
-    });
+svg.on("mouseup", function() {
+isPanning = false;
+svg.style("cursor", "auto");
+});
 
-    // Create a div for the tooltip
-    var tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
+// Create a div for the tooltip
+var tooltip = d3.select("body").append("div")
+.attr("class", "tooltip")
+.style("opacity", 0);
 
-    let arrayLength = data.length; 
+let arrayLength = data.length; 
+
+// Find the maximum float value
+const maxFloat_X = findMaxFloat(map_data.Chemical_Space.x);
+const maxFloat_Y = findMaxFloat(map_data.Chemical_Space.y);
+
+// Create scales
+const xScale = d3.scaleLinear()
+.domain(d3.extent(data, d => parseFloat(d.Chemical_Space_x)))
+.range([0, width]);
+
+const yScale = d3.scaleLinear()
+.domain(d3.extent(data, d => parseFloat(d.Chemical_Space_y)))
+.range([height, 0]);
+
+let myScale_X = d3.scaleLinear()
+.domain([0, maxFloat_X])
+.range([0, 900]);
+
+let myScale_Y = d3.scaleLinear()
+.domain([0, maxFloat_Y])
+.range([0, 900]);
+
+var circles = svg.selectAll('circles')
+.data(data) 
+.enter()
+.append('circle');
+
+var circleAttributes = circles
+.attr('cx', function(d){return findCoordinateX(d.Smiles_GNPS_results, map_data);})
+.attr('cy', function(d){return findCoordinateY(d.Smiles_GNPS_results, map_data);})
+.attr('r', 8) 
+.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+.style('stroke', 'black') // Default border color
+.style('stroke-width', 2) // Default border width
+.on("mouseover", function(event, d) {
+
+   var mouseX = event.pageX;
+   var mouseY = event.pageY;
    
-    // Find the maximum float value
-    const maxFloat_X = findMaxFloat(map_data.Chemical_Space.x);
-    const maxFloat_Y = findMaxFloat(map_data.Chemical_Space.y);
+   var currentIndex = d.index;
 
-    // Create scales
-    const xScale = d3.scaleLinear()
-        .domain(d3.extent(data, d => parseFloat(d.Chemical_Space_x)))
-        .range([0, width]);
+   circles.filter(function(e) {
 
-        const yScale = d3.scaleLinear()
-        .domain(d3.extent(data, d => parseFloat(d.Chemical_Space_y)))
-        .range([height, 0]);
+       return e.index === currentIndex;
 
-    let myScale_X = d3.scaleLinear()
-        .domain([0, maxFloat_X])
-        .range([0, 900]);
+   })
+   .style('strokewidth', 8)
+   .style('stroke', 'red')
 
-    let myScale_Y = d3.scaleLinear()
-        .domain([0, maxFloat_Y])
-        .range([0, 900]);
+   var currentIndex = d.index;
 
-    var circles = svg.selectAll('circles')
-        .data(data) 
-        .enter()
-        .append('circle');
+   rectangles.filter(function(e) {
+           return e.index === currentIndex;
+       })
+.style("stroke", "red") // Change border color to red
+.style("stroke-width", 4); // Increase border width
 
-    var circleAttributes = circles
-        .attr('cx', function(d){return findCoordinateX(d.Smiles_GNPS_results, map_data);})
-        .attr('cy', function(d){return findCoordinateY(d.Smiles_GNPS_results, map_data);})
-        .attr('r', 8) 
-        .style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        .style('stroke', 'black') // Default border color
-        .style('stroke-width', 2) // Default border width
-        .on("mouseover", function(event, d) {
+tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                           "<br> Mass: " + d.MassDiff_GNPS_results + 
+                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                           "<br> Class: " + d.cf_class_ms2query_results)
+               .style("left", (mouseX + 10) + "px")
+               .style("top", (mouseY + 10) + "px"); 
 
-            var mouseX = event.pageX;
-            var mouseY = event.pageY;
-            
-            var currentIndex = d.index;
+               // Create a container element inside the tooltip for the SVG
+           var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-            circles.filter(function(e) {
+   var svgSmiles = svgContainer.append("svg")
+       .attr("id", "svgExample")
+       .attr("width", 200)
+       .attr("height", 150);
 
-                return e.index === currentIndex;
+   // Initialize SmiDrawer and draw the molecule
+   let moleculeOptions = {};
+   let reactionOptions = {};
+   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+           })
+.on("mouseout", function() {
 
-            })
-            .style('strokewidth', 8)
-            .style('stroke', 'red')
+   circles.style('stroke', 'black') // Default border color
+       .style('stroke-width', 2) // Default border width
+   rectangles.style("stroke", "black") // Reset border color to black
+       .style("stroke-width", 1); // Reset border width
 
-            var currentIndex = d.index;
+   tooltip.transition()
+       .duration(500)
+       .style("opacity", 0);
+})
 
-            rectangles.filter(function(e) {
-                    return e.index === currentIndex;
-                })
-        .style("stroke", "red") // Change border color to red
-        .style("stroke-width", 4); // Increase border width
+.on("click", function(event, d){
 
-        tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
-                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                                    "<br> Class: " + d.cf_class_ms2query_results)
-                        .style("left", (mouseX + 10) + "px")
-                        .style("top", (mouseY + 10) + "px"); 
+var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                       " MassDiff: " + d.MassDiff_GNPS_results + 
+                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                       " Super Class: " + d.cf_superclass_ms2query_results+ 
+                       " Class: " + d.cf_class_ms2query_results+
+                       " SMILES: " + d.smiles_ms2query_results+
+                       "InChIKey: " + d.inchikey_ms2query_results;
 
-                        // Create a container element inside the tooltip for the SVG
-                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
+navigator.clipboard.writeText(textToCopy)
 
-            var svgSmiles = svgContainer.append("svg")
-                .attr("id", "svgExample")
-                .attr("width", 200)
-                .attr("height", 150);
+.then(() => {
+// Show popup
+var popup = d3.select("#popup");
+popup.classed("hidden", false);
 
-            // Initialize SmiDrawer and draw the molecule
-            let moleculeOptions = {};
-            let reactionOptions = {};
-            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-                    })
-        .on("mouseout", function() {
-
-            circles.style('stroke', 'black') // Default border color
-                .style('stroke-width', 2) // Default border width
-            rectangles.style("stroke", "black") // Reset border color to black
-                .style("stroke-width", 1); // Reset border width
-
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-
-        .on("click", function(event, d){
-
-        var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                " MassDiff: " + d.MassDiff_GNPS_results + 
-                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                " Super Class: " + d.cf_superclass_ms2query_results+ 
-                                " Class: " + d.cf_class_ms2query_results+
-                                " SMILES: " + d.smiles_ms2query_results+
-                                "InChIKey: " + d.inchikey_ms2query_results;
-
-        navigator.clipboard.writeText(textToCopy)
-
-        .then(() => {
-        // Show popup
-        var popup = d3.select("#popup");
-        popup.classed("hidden", false);
-
-        // Hide popup after 2 seconds
-        setTimeout(function() {
-            popup.classed("hidden", true);
-        }, 2000);
-        })
-        .catch(err => {
-        console.error('Failed to copy text to clipboard:', err);
-        });
-
-        });
-
-    svg2.append('text')
-        .attr("x", 20)
-        .attr("y", 30)
-        .attr("font-size", "20px")
-        .attr("font-family", "Arial")
-        .attr("fill", "black")
-        .text("Sample 1");
-
-    svg2.append('text')
-        .attr("x", 20 + (svg2.attr("width") / 3))
-        .attr("y", 30)
-        .attr("font-size", "20px")
-        .attr("font-family", "Arial")
-        .attr("fill", "black")
-        .text("Sample 2");
-
-    svg2.append('text')
-        .attr("x", 20 + (svg2.attr("width") / 3)*2)
-        .attr("y", 30)
-        .attr("font-size", "20px")
-        .attr("font-family", "Arial")
-        .attr("fill", "black")
-        .text("Sample 3");
-
-    var changeColorButton = document.getElementById("option2");
-    changeColorButton.addEventListener("click", function() {
-
-        rectangles.style("fill", function(d){
-
-            return scale(d.ms2query_model_prediction_ms2query_results)
-
-        })
-        circles.style("fill", function(d){
-
-            return scale(d.ms2query_model_prediction_ms2query_results)
-
-        })
-        
-    });
-
-    var changeColorButton2 = document.getElementById("option1");
-    changeColorButton2.addEventListener("click", function() {
-
-        rectangles.style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        circles.style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        
-    });
-
-
-    
-    var changeSortingButton = document.getElementById("optionSort2");
-
-    // Hieer glaube ich 
-
-
-
-    changeSortingButton.addEventListener("click", function(){
-
-        changeColorButton.addEventListener("click", function() {
-
-                rectangles.style("fill", function(d){
-
-                    return scale(d.ms2query_model_prediction_ms2query_results)
-
-                })
-                circles.style("fill", function(d){
-
-                    return scale(d.ms2query_model_prediction_ms2query_results)
-
-                })
-
-        });
-
-        changeColorButton2.addEventListener("click", function() {
-
-                rectangles.style("fill", function(d) { 
-                    return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-                })
-                circles.style("fill", function(d) { 
-                    return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-                })
+// Hide popup after 2 seconds
+setTimeout(function() {
+   popup.classed("hidden", true);
+}, 2000);
+})
+.catch(err => {
+console.error('Failed to copy text to clipboard:', err);
+});
 
 });
 
-        svg2.selectAll("*").remove();
+svg2.append('text')
+.attr("x", 20)
+.attr("y", 30)
+.attr("font-size", "20px")
+.attr("font-family", "Arial")
+.attr("fill", "black")
+.text("Sample 1");
 
-        svg2.append('text')
-        .attr("x", 20)
-        .attr("y", 30)
-        .attr("font-size", "20px")
-        .attr("font-family", "Arial")
-        .attr("fill", "black")
-        .text("Sample 1");
+svg2.append('text')
+.attr("x", 20 + (svg2.attr("width") / 3))
+.attr("y", 30)
+.attr("font-size", "20px")
+.attr("font-family", "Arial")
+.attr("fill", "black")
+.text("Sample 2");
 
-        svg2.append('text')
-            .attr("x", 20 + (svg2.attr("width") / 3))
-            .attr("y", 30)
-            .attr("font-size", "20px")
-            .attr("font-family", "Arial")
-            .attr("fill", "black")
-            .text("Sample 2");
+svg2.append('text')
+.attr("x", 20 + (svg2.attr("width") / 3)*2)
+.attr("y", 30)
+.attr("font-size", "20px")
+.attr("font-family", "Arial")
+.attr("fill", "black")
+.text("Sample 3");
 
-        svg2.append('text')
-            .attr("x", 20 + (svg2.attr("width") / 3)*2)
-            .attr("y", 30)
-            .attr("font-size", "20px")
-            .attr("font-family", "Arial")
-            .attr("fill", "black")
-            .text("Sample 3");
+var changeColorButton = document.getElementById("option2");
+changeColorButton.addEventListener("click", function() {
 
-        var rectangles = svg2.selectAll('rects')
-        .data(data)
-        .enter()
-        .append('rect');
+rectangles.style("fill", function(d){
 
-    var rectangleAttributes = rectangles
-        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-        .attr("y", function(d) { return 40 + d.heat_index * 12; })
-        .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 9)
-        .style("stroke", "black") 
-        .style("stroke-width", 1) 
-        .style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        .on("mouseover", function(event, d) {
+   return scale(d.ms2query_model_prediction_ms2query_results)
 
-            var mouseX = event.pageX;
-            var mouseY = event.pageY;
-            
-            var currentIndex = d.index;
+})
+circles.style("fill", function(d){
 
-            circles.filter(function(e) {
+   return scale(d.ms2query_model_prediction_ms2query_results)
 
-                return e.index === currentIndex;
+})
 
-            })
-            .style('strokewidth', 4)
-            .style('stroke', 'red')
+});
 
-            var currentIndex = d.index;
-            rectangles.filter(function(e) {
-                    return e.index === currentIndex;
-                })
-        .style("stroke", "red") // Change border color to red
-        .style("stroke-width", 4); // Increase border width
+var changeColorButton2 = document.getElementById("option1");
+changeColorButton2.addEventListener("click", function() {
 
-        // Show tooltip
-        tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
-                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                                    "<br> Class: " + d.cf_class_ms2query_results)
-                                    .style("left", function() {
-        
-        if (mouseX > window.innerWidth / 2) {
-            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-        } else {
-            return (mouseX + 10) + "px";
-        }
-    })
-    .style("top", function() {
-        
-        if (mouseY > window.innerHeight / 2) {
-            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-        } else {
-            return (mouseY + 10) + "px";
-        }
-    }); 
+rectangles.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+circles.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
 
-                        // Create a container element inside the tooltip for the SVG
-                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
-
-            var svgSmiles = svgContainer.append("svg")
-                .attr("id", "svgExample")
-                .attr("width", 200)
-                .attr("height", 150);
-
-            // Initialize SmiDrawer and draw the molecule
-            let moleculeOptions = {};
-            let reactionOptions = {};
-            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-                    })
-        .on("mouseout", function() {
-
-            circles.style('stroke', 'black') // Default border color
-                .style('stroke-width', 2)
-            rectangles.style("stroke", "black") // Reset border color to black
-                .style("stroke-width", 1); // Reset border width
-
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-        .on("click", function(event, d){
-
-            var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                " MassDiff: " + d.MassDiff_GNPS_results + 
-                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                " Super Class: " + d.cf_superclass_ms2query_results+ 
-                                " Class: " + d.cf_class_ms2query_results+
-                                " SMILES: " + d.smiles_ms2query_results+
-                                "InChIKey: " + d.inchikey_ms2query_results;
+});
 
 
-                navigator.clipboard.writeText(textToCopy)
 
-                .then(() => {
-                // Show popup
-                var popup = d3.select("#popup");
-                popup.classed("hidden", false);
+var changeSortingButton = document.getElementById("optionSort2");
 
-                // Hide popup after 2 seconds
-                setTimeout(function() {
-                    popup.classed("hidden", true);
-                }, 2000);
-                })
-                .catch(err => {
-                console.error('Failed to copy text to clipboard:', err);
-                });
+// Hieer glaube ich 
 
-                })}); 
 
-    var sortingButton2 = document.getElementById("optionSort1"); 
-    sortingButton2.addEventListener("click", function(){
 
-            changeColorButton.addEventListener("click", function() {
+changeSortingButton.addEventListener("click", function(){
 
-                rectangles.style("fill", function(d){
+changeColorButton.addEventListener("click", function() {
 
-                return scale(d.ms2query_model_prediction_ms2query_results)
+       rectangles.style("fill", function(d){
 
-            })
-            circles.style("fill", function(d){
+           return scale(d.ms2query_model_prediction_ms2query_results)
 
-                return scale(d.ms2query_model_prediction_ms2query_results)
+       })
+       circles.style("fill", function(d){
 
-            })
+           return scale(d.ms2query_model_prediction_ms2query_results)
 
-            });
+       })
 
-        changeColorButton2.addEventListener("click", function() {
+});
 
-        rectangles.style("fill", function(d) { 
-        return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        circles.style("fill", function(d) { 
-        return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
+changeColorButton2.addEventListener("click", function() {
 
-        });
+       rectangles.style("fill", function(d) { 
+           return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+       })
+       circles.style("fill", function(d) { 
+           return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+       })
 
-        svg2.selectAll("*").remove();
+});
 
-        svg2.append('text')
-            .attr("x", 20)
-            .attr("y", 30)
-            .attr("font-size", "20px")
-            .attr("font-family", "Arial")
-            .attr("fill", "black")
-            .text("Sample 1");
+svg2.selectAll("*").remove();
 
-        svg2.append('text')
-            .attr("x", 20 + (svg2.attr("width") / 3))
-            .attr("y", 30)
-            .attr("font-size", "20px")
-            .attr("font-family", "Arial")
-            .attr("fill", "black")
-            .text("Sample 2");
+svg2.append('text')
+.attr("x", 20)
+.attr("y", 30)
+.attr("font-size", "20px")
+.attr("font-family", "Arial")
+.attr("fill", "black")
+.text("Sample 1");
 
-        svg2.append('text')
-            .attr("x", 20 + (svg2.attr("width") / 3)*2)
-            .attr("y", 30)
-            .attr("font-size", "20px")
-            .attr("font-family", "Arial")
-            .attr("fill", "black")
-            .text("Sample 3");
+svg2.append('text')
+   .attr("x", 20 + (svg2.attr("width") / 3))
+   .attr("y", 30)
+   .attr("font-size", "20px")
+   .attr("font-family", "Arial")
+   .attr("fill", "black")
+   .text("Sample 2");
 
-    var rectangles = svg2.selectAll('rects')
-        .data(data)
-        .enter()
-        .append('rect');
+svg2.append('text')
+   .attr("x", 20 + (svg2.attr("width") / 3)*2)
+   .attr("y", 30)
+   .attr("font-size", "20px")
+   .attr("font-family", "Arial")
+   .attr("fill", "black")
+   .text("Sample 3");
 
-    var rectangleAttributes = rectangles
-        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-        .attr("y", function(d) { return 40 + d.index * 12; }) // Top-left corner y position
-        .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 9)
-        .style("stroke", "black") // Border color
-        .style("stroke-width", 1) // Border width
-        .style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        .on("mouseover", function(event, d) {
+var rectangles = svg2.selectAll('rects')
+.data(data)
+.enter()
+.append('rect');
 
-            var mouseX = event.pageX;
-            var mouseY = event.pageY;
-            
-            var currentIndex = d.index;
+var rectangleAttributes = rectangles
+.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
+.attr("y", function(d) { return 40 + d.heat_index * 12; })
+.attr("width", (svg2.attr("width") / 3) -40)
+.attr("height", 9)
+.style("stroke", "black") 
+.style("stroke-width", 1) 
+.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+.on("mouseover", function(event, d) {
 
-            circles.filter(function(e) {
+   var mouseX = event.pageX;
+   var mouseY = event.pageY;
+   
+   var currentIndex = d.index;
 
-                return e.index === currentIndex;
+   circles.filter(function(e) {
 
-            })
-            .style('strokewidth', 4)
-            .style('stroke', 'red')
+       return e.index === currentIndex;
 
-            var currentIndex = d.index;
-            rectangles.filter(function(e) {
-                    return e.index === currentIndex;
-                })
-        .style("stroke", "red") // Change border color to red
-        .style("stroke-width", 4); // Increase border width
+   })
+   .style('strokewidth', 4)
+   .style('stroke', 'red')
 
-        tooltip.transition()
-                        .duration(200)
-                        .style("opacity", .9);
-                    tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                    "<br> Mass: " + d.MassDiff_GNPS_results + 
-                                    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                    "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                                    "<br> Class: " + d.cf_class_ms2query_results)
-                                    .style("left", function() {
-        
-        if (mouseX > window.innerWidth / 2) {
-            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-        } else {
-            return (mouseX + 10) + "px";
-        }
-    })
-    .style("top", function() {
-        
-        if (mouseY > window.innerHeight / 2) {
-            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-        } else {
-            return (mouseY + 10) + "px";
-        }
-    }); 
+   var currentIndex = d.index;
+   rectangles.filter(function(e) {
+           return e.index === currentIndex;
+       })
+.style("stroke", "red") // Change border color to red
+.style("stroke-width", 4); // Increase border width
 
-                        // Create a container element inside the tooltip for the SVG
-                    var svgContainer = tooltip.append("div").attr("class", "svg-container");
+// Show tooltip
+tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                           "<br> MassDiff : " + d.MassDiff_GNPS_results + 
+                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                           "<br> Class: " + d.cf_class_ms2query_results)
+                           .style("left", function() {
 
-            var svgSmiles = svgContainer.append("svg")
-                .attr("id", "svgExample")
-                .attr("width", 200)
-                .attr("height", 150);
+if (mouseX > window.innerWidth / 2) {
+   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+} else {
+   return (mouseX + 10) + "px";
+}
+})
+.style("top", function() {
 
-            // Initialize SmiDrawer and draw the molecule
-            let moleculeOptions = {};
-            let reactionOptions = {};
-            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-                    })
-        .on("mouseout", function() {
+if (mouseY > window.innerHeight / 2) {
+   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+} else {
+   return (mouseY + 10) + "px";
+}
+}); 
 
-            circles.style('stroke', 'black') // Default border color
-                .style('stroke-width', 2)
-            rectangles.style("stroke", "black") // Reset border color to black
-                .style("stroke-width", 1); // Reset border width
+               // Create a container element inside the tooltip for the SVG
+           var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-    });
+   var svgSmiles = svgContainer.append("svg")
+       .attr("id", "svgExample")
+       .attr("width", 200)
+       .attr("height", 150);
 
-    var rectangles = svg2.selectAll('rects')
-        .data(data)
-        .enter()
-        .append('rect');
+   // Initialize SmiDrawer and draw the molecule
+   let moleculeOptions = {};
+   let reactionOptions = {};
+   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+           })
+.on("mouseout", function() {
 
-    var rectangleAttributes = rectangles
-        .attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-        .attr("y", function(d) { return 40 + d.index * 12; })
-        .attr("width", (svg2.attr("width") / 3) -40)
-        .attr("height", 9)
-        .style("stroke", "black")
-        .style("stroke-width", 1)
-        .style("fill", function(d) { 
-            return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-        })
-        .on("mouseover", function(event, d) {
+   circles.style('stroke', 'black') // Default border color
+       .style('stroke-width', 2)
+   rectangles.style("stroke", "black") // Reset border color to black
+       .style("stroke-width", 1); // Reset border width
 
-                        var mouseX = event.pageX;
-                        var mouseY = event.pageY;
-                        
-                        var currentIndex = d.index;
+   tooltip.transition()
+       .duration(500)
+       .style("opacity", 0);
+})
+.on("click", function(event, d){
 
-                        circles.filter(function(e) {
+   var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                       " MassDiff: " + d.MassDiff_GNPS_results + 
+                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                       " Super Class: " + d.cf_superclass_ms2query_results+ 
+                       " Class: " + d.cf_class_ms2query_results+
+                       " SMILES: " + d.smiles_ms2query_results+
+                       "InChIKey: " + d.inchikey_ms2query_results;
 
-                            return e.index === currentIndex;
 
-                        })
-                        .style('strokewidth', 4)
-                        .style('stroke', 'red')
+       navigator.clipboard.writeText(textToCopy)
 
-                        var currentIndex = d.index;
-                        rectangles.filter(function(e) {
-                                return e.index === currentIndex;
-                            })
-                    .style("stroke", "red")
-                    .style("stroke-width", 4);
+       .then(() => {
+       // Show popup
+       var popup = d3.select("#popup");
+       popup.classed("hidden", false);
 
-                    tooltip.transition()
-    .duration(200)
-    .style("opacity", .9);
+       // Hide popup after 2 seconds
+       setTimeout(function() {
+           popup.classed("hidden", true);
+       }, 2000);
+       })
+       .catch(err => {
+       console.error('Failed to copy text to clipboard:', err);
+       });
+
+       })}); 
+
+var sortingButton2 = document.getElementById("optionSort1"); 
+sortingButton2.addEventListener("click", function(){
+
+   changeColorButton.addEventListener("click", function() {
+
+       rectangles.style("fill", function(d){
+
+       return scale(d.ms2query_model_prediction_ms2query_results)
+
+   })
+   circles.style("fill", function(d){
+
+       return scale(d.ms2query_model_prediction_ms2query_results)
+
+   })
+
+   });
+
+changeColorButton2.addEventListener("click", function() {
+
+rectangles.style("fill", function(d) { 
+return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+circles.style("fill", function(d) { 
+return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+
+});
+
+svg2.selectAll("*").remove();
+
+svg2.append('text')
+   .attr("x", 20)
+   .attr("y", 30)
+   .attr("font-size", "20px")
+   .attr("font-family", "Arial")
+   .attr("fill", "black")
+   .text("Sample 1");
+
+svg2.append('text')
+   .attr("x", 20 + (svg2.attr("width") / 3))
+   .attr("y", 30)
+   .attr("font-size", "20px")
+   .attr("font-family", "Arial")
+   .attr("fill", "black")
+   .text("Sample 2");
+
+svg2.append('text')
+   .attr("x", 20 + (svg2.attr("width") / 3)*2)
+   .attr("y", 30)
+   .attr("font-size", "20px")
+   .attr("font-family", "Arial")
+   .attr("fill", "black")
+   .text("Sample 3");
+
+var rectangles = svg2.selectAll('rects')
+.data(data)
+.enter()
+.append('rect');
+
+var rectangleAttributes = rectangles
+.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
+.attr("y", function(d) { return 40 + d.index * 12; }) // Top-left corner y position
+.attr("width", (svg2.attr("width") / 3) -40)
+.attr("height", 9)
+.style("stroke", "black") // Border color
+.style("stroke-width", 1) // Border width
+.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+.on("mouseover", function(event, d) {
+
+   var mouseX = event.pageX;
+   var mouseY = event.pageY;
+   
+   var currentIndex = d.index;
+
+   circles.filter(function(e) {
+
+       return e.index === currentIndex;
+
+   })
+   .style('strokewidth', 4)
+   .style('stroke', 'red')
+
+   var currentIndex = d.index;
+   rectangles.filter(function(e) {
+           return e.index === currentIndex;
+       })
+.style("stroke", "red") // Change border color to red
+.style("stroke-width", 4); // Increase border width
+
+tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                           "<br> MassDiff: " + d.MassDiff_GNPS_results + 
+                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
+                           "<br> Class: " + d.cf_class_ms2query_results)
+                           .style("left", function() {
+
+if (mouseX > window.innerWidth / 2) {
+   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+} else {
+   return (mouseX + 10) + "px";
+}
+})
+.style("top", function() {
+
+if (mouseY > window.innerHeight / 2) {
+   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+} else {
+   return (mouseY + 10) + "px";
+}
+}); 
+
+               // Create a container element inside the tooltip for the SVG
+           var svgContainer = tooltip.append("div").attr("class", "svg-container");
+
+   var svgSmiles = svgContainer.append("svg")
+       .attr("id", "svgExample")
+       .attr("width", 200)
+       .attr("height", 150);
+
+   // Initialize SmiDrawer and draw the molecule
+   let moleculeOptions = {};
+   let reactionOptions = {};
+   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+           })
+.on("mouseout", function() {
+
+   circles.style('stroke', 'black') // Default border color
+       .style('stroke-width', 2)
+   rectangles.style("stroke", "black") // Reset border color to black
+       .style("stroke-width", 1); // Reset border width
+
+   tooltip.transition()
+       .duration(500)
+       .style("opacity", 0);
+})
+});
+
+var rectangles = svg2.selectAll('rects')
+.data(data)
+.enter()
+.append('rect');
+
+var rectangleAttributes = rectangles
+.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
+.attr("y", function(d) { return 40 + d.index * 12; })
+.attr("width", (svg2.attr("width") / 3) -40)
+.attr("height", 9)
+.style("stroke", "black")
+.style("stroke-width", 1)
+.style("fill", function(d) { 
+   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
+})
+.on("mouseover", function(event, d) {
+
+               var mouseX = event.pageX;
+               var mouseY = event.pageY;
+               
+               var currentIndex = d.index;
+
+               circles.filter(function(e) {
+
+                   return e.index === currentIndex;
+
+               })
+               .style('strokewidth', 4)
+               .style('stroke', 'red')
+
+               var currentIndex = d.index;
+               rectangles.filter(function(e) {
+                       return e.index === currentIndex;
+                   })
+           .style("stroke", "red")
+           .style("stroke-width", 4);
+
+           tooltip.transition()
+.duration(200)
+.style("opacity", .9);
 tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr + 
-             "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-             "<br> Mass: " + d.MassDiff_GNPS_results + 
-             "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results +
-             "<br> Super Class: " + d.cf_superclass_ms2query_results + 
-             "<br> Class: " + d.cf_class_ms2query_results)
-    .style("left", function() {
-        
-        if (mouseX > window.innerWidth / 2) {
-            return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-        } else {
-            return (mouseX + 10) + "px";
-        }
-    })
-    .style("top", function() {
-        
-        if (mouseY > window.innerHeight / 2) {
-            return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-        } else {
-            return (mouseY + 10) + "px";
-        }
-    }); 
+    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+    "<br> Mass: " + d.MassDiff_GNPS_results + 
+    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results +
+    "<br> Super Class: " + d.cf_superclass_ms2query_results + 
+    "<br> Class: " + d.cf_class_ms2query_results)
+.style("left", function() {
 
-                        
-            var svgContainer = tooltip.append("div").attr("class", "svg-container");
+if (mouseX > window.innerWidth / 2) {
+   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
+} else {
+   return (mouseX + 10) + "px";
+}
+})
+.style("top", function() {
 
-            var svgSmiles = svgContainer.append("svg")
-                .attr("id", "svgExample")
-                .attr("width", 200)
-                .attr("height", 150);
+if (mouseY > window.innerHeight / 2) {
+   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
+} else {
+   return (mouseY + 10) + "px";
+}
+}); 
 
-            let moleculeOptions = {};
-            let reactionOptions = {};
-            let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-            sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-                    })
-        .on("mouseout", function() {
+               
+   var svgContainer = tooltip.append("div").attr("class", "svg-container");
 
-            circles.style('stroke', 'black') 
-                .style('stroke-width', 2) 
-            rectangles.style("stroke", "black") 
-                .style("stroke-width", 1); 
+   var svgSmiles = svgContainer.append("svg")
+       .attr("id", "svgExample")
+       .attr("width", 200)
+       .attr("height", 150);
 
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        })
-        .on("click", function(event, d){
+   let moleculeOptions = {};
+   let reactionOptions = {};
+   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
+   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
+           })
+.on("mouseout", function() {
 
-            var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                                " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                                " MassDiff: " + d.MassDiff_GNPS_results + 
-                                " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                                " Super Class: " + d.cf_superclass_ms2query_results+ 
-                                " Class: " + d.cf_class_ms2query_results+
-                                " SMILES: " + d.smiles_ms2query_results+
-                                "InChIKey: " + d.inchikey_ms2query_results;
+   circles.style('stroke', 'black') 
+       .style('stroke-width', 2) 
+   rectangles.style("stroke", "black") 
+       .style("stroke-width", 1); 
 
-            
-            navigator.clipboard.writeText(textToCopy)
+   tooltip.transition()
+       .duration(500)
+       .style("opacity", 0);
+})
+.on("click", function(event, d){
 
-            .then(() => {
-            // Show popup
-            var popup = d3.select("#popup");
-            popup.classed("hidden", false);
+   var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
+                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
+                       " MassDiff: " + d.MassDiff_GNPS_results + 
+                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
+                       " Super Class: " + d.cf_superclass_ms2query_results+ 
+                       " Class: " + d.cf_class_ms2query_results+
+                       " SMILES: " + d.smiles_ms2query_results+
+                       "InChIKey: " + d.inchikey_ms2query_results;
 
-            // Hide popup after 2 seconds
-            setTimeout(function() {
-                popup.classed("hidden", true);
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('Failed to copy text to clipboard:', err);
-        });
+   
+   navigator.clipboard.writeText(textToCopy)
 
-        })  
-        
+   .then(() => {
+   // Show popup
+   var popup = d3.select("#popup");
+   popup.classed("hidden", false);
+
+   // Hide popup after 2 seconds
+   setTimeout(function() {
+       popup.classed("hidden", true);
+   }, 2000);
+})
+.catch(err => {
+   console.error('Failed to copy text to clipboard:', err);
+});
+
+})  
+
 });
 
 //["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]
 var colorMap = {
-    "Organic nitrogen compounds": chroma('#1f77b4'),
-    "Lipids and lipid-like molecules": chroma('#ff7f0e'),
-    "Benzenoids": chroma('#2ca02c'),
-    "Organic oxygen compounds": chroma('#d62728'),
-    "Organic acids and derivatives": chroma('#9467bd'),
-    "Phenylpropanoids and polyketides": chroma('#8c564b'),
-    "Alkaloids and derivatives": chroma('#e377c2'),
-    "Nucleosides, nucleotides, and analogues": chroma('#7f7f7f'),
-    "Organoheterocyclic compounds": chroma('#bcbd22'),
+"Organic nitrogen compounds": chroma('#1f77b4'),
+"Lipids and lipid-like molecules": chroma('#ff7f0e'),
+"Benzenoids": chroma('#2ca02c'),
+"Organic oxygen compounds": chroma('#d62728'),
+"Organic acids and derivatives": chroma('#9467bd'),
+"Phenylpropanoids and polyketides": chroma('#8c564b'),
+"Alkaloids and derivatives": chroma('#e377c2'),
+"Nucleosides, nucleotides, and analogues": chroma('#7f7f7f'),
+"Organoheterocyclic compounds": chroma('#bcbd22'),
 
-    "default": "white"
+"default": "white"
 };
 
 var scale = chroma.scale(['yellow', 'red', 'black']);
 
 function findCoordinateX(smiles, Tmap){
 
-    let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
-    let coordinate = Tmap.Chemical_Space.x[index]; 
-    return coordinate; 
-
+let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
+let coordinate = Tmap.Chemical_Space.x[index]; 
+return coordinate; 
 }
 
 function findCoordinateY(smiles, Tmap){
 
-    let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
-    let coordinate = Tmap.Chemical_Space.y[index]; 
-    return coordinate; 
+let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
+let coordinate = Tmap.Chemical_Space.y[index]; 
+return coordinate; 
 
 }
 
 function findMaxFloat(arr) {
-  let max = -Infinity;
-  for (let i = 0; i < arr.length; i++) {
-    if (typeof arr[i] === 'number' && !isNaN(arr[i])) {
-      if (arr[i] > max) {
-        max = arr[i];
-      }
-    }
-  }
-  return max;
+let max = -Infinity;
+for (let i = 0; i < arr.length; i++) {
+if (typeof arr[i] === 'number' && !isNaN(arr[i])) {
+if (arr[i] > max) {
+max = arr[i];
+}
+}
+}
+return max;
 }
 
-javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
-    </script>
+// javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
+
+
+</script>
 </body>
 </html>
