@@ -116,10 +116,13 @@ button.link:hover, .segmented button:hover, .enc-switch button:hover { color: va
 button:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 
 /* ---------- panel C: colour key ---------- */
-.enc-switch { display: inline-flex; gap: 10px; }
-.enc-switch button[aria-checked="true"] { color: var(--ink); }
-.enc-mark::before { content: "○"; margin-right: 4px; }
-.enc-switch button[aria-checked="true"] .enc-mark::before { content: "●"; }
+/* two-state switch: square, 1px ink frame, active half filled */
+.enc-switch { display: inline-flex; border: 1px solid var(--ink); }
+.enc-switch button { padding: 2px 10px; color: var(--ink); line-height: 16px; }
+.enc-switch button + button { border-left: 1px solid var(--ink); }
+.enc-switch button:hover { background: var(--absent); }
+.enc-switch button[aria-checked="true"] { background: var(--ink); color: var(--paper); cursor: default; }
+.enc-mark { display: none; }
 
 .keys { display: grid; grid-template-columns: minmax(0, 440px) 180px; justify-content: space-between; gap: var(--gutter); min-height: 0; }
 .key { cursor: pointer; transition: opacity 0.1s; }
