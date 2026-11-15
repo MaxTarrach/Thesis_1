@@ -50,7 +50,7 @@
   const mapG = overlay.append("g");
   const matrixSvg = d3.select("#matrix");
   const tooltip = document.getElementById("tooltip");
-  const toast = document.getElementById("toast");
+  const help = document.getElementById("help");
 
   d3.json("csvjson.json").then((rows) => {
     // One feature per `index`; superclass and confidence are constant per feature across samples.
@@ -99,7 +99,6 @@
       setSelected(f);
       copyFeature(f);
     };
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setSelected(null); });
 
     function recolor() { map.recolor(); matrix.recolor(); }
 
@@ -113,15 +112,32 @@
     d3.selectAll("[data-enc]").on("click", function () { setColorBy(this.dataset.enc); });
 
     // Matrix sort (only affects the matrix, so it lives in the matrix header)
-    d3.selectAll("[data-sort]").on("click", function () {
-      state.sortBy = this.dataset.sort;
-      d3.selectAll("[data-sort]").attr("aria-checked", function () { return this.dataset.sort === state.sortBy; });
+    function setSort(sort) {
+      state.sortBy = sort;
+      d3.selectAll("[data-sort]").attr("aria-checked", function () { return this.dataset.sort === sort; });
       matrix.sort(true);
-    });
+    }
+    d3.selectAll("[data-sort]").on("click", function () { setSort(this.dataset.sort); });
 
     d3.selectAll("[data-zoom]").on("click", function () {
       const z = this.dataset.zoom;
       if (z === "reset") map.resetZoom(); else map.zoomBy(z === "in" ? 1.5 : 1 / 1.5);
+    });
+
+    // Keyboard: + / - zoom, R reset, S cycle sort, C toggle colour, Esc clear selection.
+    document.addEventListener("keydown", (e) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.target.closest && e.target.closest("input, textarea, select")) return;
+      switch (e.key) {
+        case "+": case "=": map.zoomBy(1.5); break;
+        case "-": case "_": map.zoomBy(1 / 1.5); break;
+        case "r": case "R": map.resetZoom(); break;
+        case "s": case "S": setSort(state.sortBy === "index" ? "confidence" : "index"); break;
+        case "c": case "C": setColorBy(state.colorBy === "superclass" ? "confidence" : "superclass"); break;
+        case "Escape": setSelected(null); break;
+        default: return;
+      }
+      e.preventDefault();
     });
 
     window.addEventListener("resize", () => { map.resize(); matrix.resize(); });
@@ -415,18 +431,18 @@
       tooltip.innerHTML = `
         <h3>${escapeHtml(fmt(r.Compound_Name_GNPS_results))}</h3>
         <dl>
-          <dt>Feature</dt><dd>#${f.index} · query spectrum ${fmt(r.query_spectrum_nr)}</dd>
-          <dt>Present in</dt><dd>${present}</dd>
-          <dt>Analogue</dt><dd>${escapeHtml(fmt(r.analog_compound_name_ms2query_results))}</dd>
-          <dt>Confidence</dt><dd>${d3.format(".3f")(f.confidence)}</dd>
-          <dt>Superclass</dt><dd>${escapeHtml(f.superclass)}</dd>
-          <dt>Class</dt><dd>${escapeHtml(fmt(r.cf_class_ms2query_results))}</dd>
+          <dt>feature</dt><dd>#${f.index}, query spectrum ${fmt(r.query_spectrum_nr)}</dd>
+          <dt>present in</dt><dd>${present}</dd>
+          <dt>analogue</dt><dd>${escapeHtml(fmt(r.analog_compound_name_ms2query_results))}</dd>
+          <dt>confidence</dt><dd>${d3.format(".3f")(f.confidence)}</dd>
+          <dt>superclass</dt><dd>${escapeHtml(f.superclass)}</dd>
+          <dt>class</dt><dd>${escapeHtml(fmt(r.cf_class_ms2query_results))}</dd>
           <dt>NPC pathway</dt><dd>${escapeHtml(fmt(r.npc_pathway_results_ms2query_results))}</dd>
-          <dt>Spectrum ID</dt><dd>${escapeHtml(fmt(r.spectrum_ids_ms2query_results))}</dd>
-          <dt>Mass diff.</dt><dd>${fmt(r.MassDiff_GNPS_results)}</dd>
+          <dt>spectrum ID</dt><dd>${escapeHtml(fmt(r.spectrum_ids_ms2query_results))}</dd>
+          <dt>mass diff.</dt><dd>${fmt(r.MassDiff_GNPS_results)}</dd>
         </dl>
         ${r.Smiles_GNPS_results ? '<svg class="structure" width="220" height="140"></svg>' : ""}
-        <div class="tip-foot">${f.node >= 0 ? "" : "Not located in the TMAP · "}Click to copy details</div>`;
+        <div class="tip-foot">${f.node >= 0 ? "" : "not in TMAP; "}click: select + copy</div>`;
       tooltip.hidden = false;
       const target = tooltip.querySelector(".structure");
       if (target && window.SmiDrawer) {
@@ -457,16 +473,18 @@
       `InChIKey: ${r.inchikey_ms2query_results}`,
     ].join("\n");
     navigator.clipboard.writeText(text)
-      .then(() => flash(`Feature #${f.index} copied to clipboard`))
-      .catch(() => flash("Could not access the clipboard"));
+      .then(() => flash(`copied #${f.index}`))
+      .catch(() => flash("clipboard unavailable"));
   }
 
-  let toastTimer;
+  // Brief status in the help line instead of a toast.
+  const HELP_TEXT = help.textContent;
+  let helpTimer;
   function flash(msg) {
-    toast.textContent = msg;
-    toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toast.classList.remove("show"), 1800);
+    help.textContent = msg;
+    help.classList.add("flash");
+    clearTimeout(helpTimer);
+    helpTimer = setTimeout(() => { help.textContent = HELP_TEXT; help.classList.remove("flash"); }, 1800);
   }
 
   function getCss(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
