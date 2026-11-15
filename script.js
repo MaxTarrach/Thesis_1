@@ -71,6 +71,9 @@
 
     const onMap = features.filter((f) => f.node >= 0);
 
+    document.getElementById("prov-samples").textContent = SAMPLES.length;
+    document.getElementById("prov-ref").textContent = d3.format(",")(CS.x.length);
+
     buildLegends(features);
     const map = createMap(onMap);
     const matrix = createMatrix(features);

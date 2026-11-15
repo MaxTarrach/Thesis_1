@@ -13,19 +13,16 @@
 </head>
 <body>
 
-  <header class="app-header">
-    <h1>MuMeVIS</h1>
-    <p class="subtitle">Multi-sample metabolomics: MS2Query analogues in chemical space</p>
+  <header class="prov">
+    <h1>MuMeVIS 0.4</h1>
+    <span>— analogue search across <span id="prov-samples">3</span> samples · ref: <span id="prov-ref">20,889</span> compounds · build 2026-11-15</span>
   </header>
 
-  <main class="views">
+  <main class="fig">
 
-    <!-- Left view: chemical space -->
-    <section class="panel" id="map-panel" aria-labelledby="map-title">
+    <section class="panel" id="panel-a" aria-labelledby="title-a">
       <div class="panel-head">
-        <div class="panel-title">
-          <h2 id="map-title">Chemical space</h2>
-        </div>
+        <h2 id="title-a"><span class="fig-letter">A</span>Chemical space</h2>
         <div class="panel-tools">
           <button type="button" class="link" id="reset-zoom" data-zoom="reset">reset</button>
         </div>
@@ -36,50 +33,50 @@
       </div>
     </section>
 
-    <!-- Right view: feature x sample matrix -->
-    <section class="panel" id="matrix-panel" aria-labelledby="matrix-title">
-      <div class="panel-head">
-        <div class="panel-title">
-          <h2 id="matrix-title">Feature × sample matrix</h2>
-        </div>
-        <div class="panel-tools">
-          <span class="tool-label" id="sort-label">Sort rows</span>
-          <div class="segmented" role="radiogroup" aria-labelledby="sort-label">
-            <button type="button" role="radio" data-sort="index" aria-checked="true">Feature index</button>
-            <button type="button" role="radio" data-sort="confidence" aria-checked="false">Confidence</button>
+    <div class="col-right">
+      <section class="panel" id="panel-b" aria-labelledby="title-b">
+        <div class="panel-head">
+          <h2 id="title-b"><span class="fig-letter">B</span>Features × samples</h2>
+          <div class="panel-tools">
+            <span id="sort-label">sort:</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="sort-label">
+              <button type="button" role="radio" data-sort="index" aria-checked="true">index</button>
+              <button type="button" role="radio" data-sort="confidence" aria-checked="false">confidence</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="panel-body" id="matrix-body">
-        <svg id="matrix"></svg>
-      </div>
-    </section>
+        <div class="panel-body" id="matrix-body">
+          <svg id="matrix"></svg>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-c" aria-labelledby="title-c">
+        <div class="panel-head">
+          <h2 id="title-c"><span class="fig-letter">C</span>Colour</h2>
+        </div>
+        <div class="encoding-options" role="radiogroup" aria-labelledby="title-c">
+          <button type="button" class="enc-card" role="radio" data-enc="superclass" aria-checked="true">
+            <span class="enc-head">
+              <span class="enc-radio" aria-hidden="true"></span>
+              <span class="enc-name">superclass</span>
+            </span>
+            <span class="enc-body" id="legend-superclass"></span>
+          </button>
+          <button type="button" class="enc-card" role="radio" data-enc="confidence" aria-checked="false">
+            <span class="enc-head">
+              <span class="enc-radio" aria-hidden="true"></span>
+              <span class="enc-name">confidence</span>
+            </span>
+            <span class="enc-body" id="legend-confidence"></span>
+          </button>
+        </div>
+      </section>
+    </div>
 
   </main>
 
-  <!-- Shared colour encoding: each card is a legend AND the switch for that encoding -->
-  <footer class="encoding-bar">
-    <div class="encoding-intro">
-      <span class="encoding-title" id="encoding-title">Colour by</span>
-    </div>
-
-    <div class="encoding-options" role="radiogroup" aria-labelledby="encoding-title">
-      <button type="button" class="enc-card" role="radio" data-enc="superclass" aria-checked="true">
-        <span class="enc-head">
-          <span class="enc-radio" aria-hidden="true"></span>
-          <span class="enc-name">Chemical superclass</span>
-        </span>
-        <span class="enc-body" id="legend-superclass"></span>
-      </button>
-
-      <button type="button" class="enc-card" role="radio" data-enc="confidence" aria-checked="false">
-        <span class="enc-head">
-          <span class="enc-radio" aria-hidden="true"></span>
-          <span class="enc-name">Confidence in analogue</span>
-        </span>
-        <span class="enc-body" id="legend-confidence"></span>
-      </button>
-    </div>
+  <footer class="colophon">
+    <span>[lab name] · [citation] · <a href="https://github.com/MaxTarrach/Thesis_1">github.com/MaxTarrach/Thesis_1</a> · data: MS2Query, ClassyFire</span>
   </footer>
 
   <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
