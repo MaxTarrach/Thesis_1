@@ -2,9 +2,6 @@
 
 **Design and comparative analysis of interactive data visualization concepts for exploring complex biochemical samples**
 
-Master's thesis project · M.Sc. Media Informatics · Hochschule Düsseldorf (Faculty of Media)
-Author: Maximilian Tarrach · Supervisors: Prof. Kay M. Schröder, Prof. Dr. Florian Huber · Submitted May 2024
-
 ---
 
 ## About the project
