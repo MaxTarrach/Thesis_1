@@ -25,11 +25,9 @@
       <div class="panel-head">
         <div class="panel-title">
           <h2 id="map-title">Chemical space</h2>
-          <span class="panel-meta" id="map-meta">TMAP</span>
         </div>
         <div class="panel-tools">
-          <span class="hint">Scroll to zoom · drag to pan</span>
-          <button type="button" class="btn" id="reset-zoom">Reset view</button>
+          <button type="button" class="link" id="reset-zoom" data-zoom="reset">reset</button>
         </div>
       </div>
       <div class="panel-body" id="map-body">
@@ -43,7 +41,6 @@
       <div class="panel-head">
         <div class="panel-title">
           <h2 id="matrix-title">Feature × sample matrix</h2>
-          <span class="panel-meta" id="matrix-meta"></span>
         </div>
         <div class="panel-tools">
           <span class="tool-label" id="sort-label">Sort rows</span>
@@ -64,7 +61,6 @@
   <footer class="encoding-bar">
     <div class="encoding-intro">
       <span class="encoding-title" id="encoding-title">Colour by</span>
-      <span class="encoding-note">One encoding at a time, applied to both views. Click a legend to switch.</span>
     </div>
 
     <div class="encoding-options" role="radiogroup" aria-labelledby="encoding-title">
@@ -72,7 +68,6 @@
         <span class="enc-head">
           <span class="enc-radio" aria-hidden="true"></span>
           <span class="enc-name">Chemical superclass</span>
-          <span class="enc-kind">categorical · ClassyFire</span>
         </span>
         <span class="enc-body" id="legend-superclass"></span>
       </button>
@@ -81,7 +76,6 @@
         <span class="enc-head">
           <span class="enc-radio" aria-hidden="true"></span>
           <span class="enc-name">Confidence in analogue</span>
-          <span class="enc-kind">continuous · MS2Query score</span>
         </span>
         <span class="enc-body" id="legend-confidence"></span>
       </button>

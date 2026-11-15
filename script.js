@@ -30,6 +30,7 @@
 
   const state = { colorBy: "superclass", sortBy: "index", hover: null };
 
+  const isHollow = (f) => state.colorBy === "superclass" && f.superclass === UNCLASSIFIED;
   const colorOf = (f) => state.colorBy === "superclass"
     ? SUPERCLASS_COLORS.get(f.superclass)
     : confidenceColor(f.confidence);
@@ -69,11 +70,6 @@
     }).sort((a, b) => a.index - b.index);
 
     const onMap = features.filter((f) => f.node >= 0);
-
-    document.getElementById("map-meta").textContent =
-      `TMAP of ${d3.format(",")(CS.x.length)} reference compounds · ${onMap.length} of ${features.length} features located`;
-    document.getElementById("matrix-meta").textContent =
-      `${features.length} features · ${SAMPLES.length} samples`;
 
     buildLegends(features);
     const map = createMap(onMap);
@@ -170,12 +166,12 @@
         ctx.moveTo(x(TREE.x[i]), y(TREE.y[i]));
         ctx.lineTo(x(TREE.x[i + 1]), y(TREE.y[i + 1]));
       }
-      ctx.strokeStyle = getCss("--map-edge");
+      ctx.strokeStyle = getCss("--tree");
       ctx.lineWidth = 0.6 / transform.k;
       ctx.stroke();
 
       // Nodes
-      ctx.fillStyle = getCss("--map-node");
+      ctx.fillStyle = getCss("--tree");
       const s = 1.6 / transform.k;
       for (let i = 0; i < CS.x.length; i++) {
         ctx.fillRect(x(CS.x[i]) - s / 2, y(CS.y[i]) - s / 2, s, s);
@@ -183,7 +179,7 @@
       ctx.restore();
     }
 
-    api.recolor = () => dots.attr("fill", colorOf);
+    api.recolor = () => dots.attr("fill", colorOf).classed("hollow", isHollow);
     api.highlight = () => {
       const h = state.hover;
       dots.classed("dim", (f) => h !== null && f.index !== h)
@@ -291,7 +287,7 @@
       .on("mouseleave", () => api.onHover(null))
       .on("click", (event) => { const f = featureAt(event); if (f) api.onClick(f); });
 
-    api.recolor = () => cells.attr("fill", (d) => colorOf(d.f));
+    api.recolor = () => cells.attr("fill", (d) => colorOf(d.f)).classed("unclassified", (d) => isHollow(d.f));
     api.highlight = () => {
       const h = state.hover;
       if (h === null) { highlightRect.style("display", "none"); return; }
