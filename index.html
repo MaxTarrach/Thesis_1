@@ -1,851 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MuMeVIS</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MuMeVIS</title>
 
-    <link rel="stylesheet" href="style.css">
-    <script src="https://d3js.org/d3.v6.min.js"></script>
-    <script src="TmapData.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.1/chroma.min.js"></script>
-    <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
-    <script src="script.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <script src="https://unpkg.com/smiles-drawer@2.0.1/dist/smiles-drawer.min.js"></script>
+  <script src="TmapData.js"></script>
+  <script src="script.js" defer></script>
 </head>
 <body>
 
-        <div class="box">
-            <svg id="chart"></svg>
+  <header class="app-header">
+    <h1>MuMeVIS</h1>
+    <p class="subtitle">Multi-sample metabolomics: MS2Query analogues in chemical space</p>
+  </header>
+
+  <main class="views">
+
+    <!-- Left view: chemical space -->
+    <section class="panel" id="map-panel" aria-labelledby="map-title">
+      <div class="panel-head">
+        <div class="panel-title">
+          <h2 id="map-title">Chemical space</h2>
+          <span class="panel-meta" id="map-meta">TMAP</span>
         </div>
-
-        <div class="box" id="svgContainer_matrix" style="overflow: hidden;">
-                <svg id="heatmap" class="content"></svg>
+        <div class="panel-tools">
+          <span class="hint">Scroll to zoom · drag to pan</span>
+          <button type="button" class="btn" id="reset-zoom">Reset view</button>
         </div>
+      </div>
+      <div class="panel-body" id="map-body">
+        <canvas id="map-canvas"></canvas>
+        <svg id="map-overlay"></svg>
+      </div>
+    </section>
 
+    <!-- Right view: feature x sample matrix -->
+    <section class="panel" id="matrix-panel" aria-labelledby="matrix-title">
+      <div class="panel-head">
+        <div class="panel-title">
+          <h2 id="matrix-title">Feature × sample matrix</h2>
+          <span class="panel-meta" id="matrix-meta"></span>
+        </div>
+        <div class="panel-tools">
+          <span class="tool-label" id="sort-label">Sort rows</span>
+          <div class="segmented" role="radiogroup" aria-labelledby="sort-label">
+            <button type="button" role="radio" data-sort="index" aria-checked="true">Feature index</button>
+            <button type="button" role="radio" data-sort="confidence" aria-checked="false">Confidence</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-body" id="matrix-body">
+        <svg id="matrix"></svg>
+      </div>
+    </section>
 
-    <div class="fixed-bottom-right">
-        <svg class="legend" width="600" height="200"></svg>
+  </main>
+
+  <!-- Shared colour encoding: each card is a legend AND the switch for that encoding -->
+  <footer class="encoding-bar">
+    <div class="encoding-intro">
+      <span class="encoding-title" id="encoding-title">Colour by</span>
+      <span class="encoding-note">One encoding at a time, applied to both views. Click a legend to switch.</span>
     </div>
 
-    <div class="fixed-bottom-left">
-        <form>  
-            
-            <legend class="interaction">Color-Scheme</legend>
-            <input type="radio" id="option1" name="choice" value="option1" checked>
-            <label for="option1">Superclass</label><br>
-            <input type="radio" id="option2" name="choice" value="option2">
-            <label for="option2">Confidence in Analogue</label><br>
+    <div class="encoding-options" role="radiogroup" aria-labelledby="encoding-title">
+      <button type="button" class="enc-card" role="radio" data-enc="superclass" aria-checked="true">
+        <span class="enc-head">
+          <span class="enc-radio" aria-hidden="true"></span>
+          <span class="enc-name">Chemical superclass</span>
+          <span class="enc-kind">categorical · ClassyFire</span>
+        </span>
+        <span class="enc-body" id="legend-superclass"></span>
+      </button>
 
-        </form>
-
-        <form>  
-            
-            <legend class="interaction">Sort Matrix after:</legend>
-            <input type="radio" id="optionSort1" name="choice" value="option1" checked>
-            <label for="option1">Index</label><br>
-            <input type="radio" id="optionSort2" name="choice" value="option2">
-            <label for="option2">Confidence in Analogue</label><br>
-
-        </form>
+      <button type="button" class="enc-card" role="radio" data-enc="confidence" aria-checked="false">
+        <span class="enc-head">
+          <span class="enc-radio" aria-hidden="true"></span>
+          <span class="enc-name">Confidence in analogue</span>
+          <span class="enc-kind">continuous · MS2Query score</span>
+        </span>
+        <span class="enc-body" id="legend-confidence"></span>
+      </button>
     </div>
+  </footer>
 
+  <div id="tooltip" class="tooltip" role="tooltip" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <div id="popup" class="hidden">The substance you clicked is copied to your clipboard</div>
-
-<script>
-
-       //var scale = chroma.scale(['yellow', 'red', 'black']);
-   var legendData = ["Organic nitrogen compounds", "Lipids and lipid-like molecules", "Benzenoids", "Organic oxygen compounds",
-   "Organic acids and derivatives", "Phenylpropanoids and polyketides", "Alkaloids and derivatives", "Nucleosides, nucleotides, and analogues",
-   "Organoheterocyclic compounds", "Confidence = 1,0", "Confidence = 0,5", "Confidence = 0,0"];
-var colorScale = d3.scaleOrdinal()
-   .domain(legendData)
-   .range(["#1f77b4", "#ff7f0e", "#2ca02c", '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', 'black', 'red', 'yellow']); // Example colors
-
-// Create SVG container for legend
-var legendWidth = 350; // Adjust width as needed
-var legendHeight = 250; // Adjust height as needed
-
-var legend = d3.select(".legend")
-   .attr("width", legendWidth)
-   .attr("height", legendHeight);
-
-// Append border
-legend.append("rect")
-   .attr("width", legendWidth)
-   .attr("height", legendHeight)
-   .style("fill", "none")
-   .style("stroke", "black")
-   .style("stroke-width", 1);
-
-// Add legend items
-var legendItems = legend.selectAll("g")
-   .data(legendData)
-   .enter().append("g")
-   .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
-
-// Append colored rectangles to represent categories
-legendItems.append("rect")
-   .attr("x", 10)
-   .attr("y", 10)
-   .attr("width", 18)
-   .attr("height", 18)
-   .style("fill", function(d) { return colorScale(d); });
-
-// Append text labels
-legendItems.append("text")
-   .attr("x", 40)
-   .attr("y", 19)
-   .attr("dy", ".35em")
-   .style("text-anchor", "start")
-   .style("font-size", "14px")
-   .text(function(d) { return d; });
-   
-const width = 900;
-const height = 900;
-const svg = d3.select('#chart')
-.attr('width', width)
-.attr('height', height);
-
-const imageWidth = 900; 
-const imageHeight = 900; 
-svg.append('image')
-.attr('href', 'scatter_plot-2.svg')
-.attr('width', imageWidth)
-.attr('height', imageHeight);
-
-var svgContainer = d3.select("#svgContainer_matrix");
-
-// Get the dimensions of the svgContainer_matrix div
-const containerWidth = document.getElementById('svgContainer_matrix').offsetWidth;
-const containerHeight = document.getElementById('svgContainer_matrix').offsetHeight;
-
-var svg2 = svgContainer.select('#heatmap')
-.attr('width', containerWidth) 
-.attr('height', containerHeight); 
-
-function updateSize() {
-
-var width_ref = window.innerWidth * 0.48; 
-var height_ref = window.innerHeight * 0.9; 
-svg.attr("width", width_ref)
-   .attr("height", height_ref);
-svg2.attr("width", width_ref)
-   .attr("height", height_ref);
-
-}
-updateSize(); 
-window.addEventListener("resize", updateSize);
-
-// Load data from CSV
-d3.json('csvjson.json', {delimiter: ';'}).then(function(data) {
-
-// Define variables for panning
-var isPanning = false;
-var initialMouseX, initialMouseY;
-var viewBoxX = 0;
-var viewBoxY = 0;
-
-svg.on("mousedown", function(event) {
-isPanning = true;
-initialMouseX = event.pageX;
-initialMouseY = event.pageY;
-svg.style("cursor", "grabbing");
-});
-
-svg.on("mousemove", function(event) {
-if (isPanning) {
-var dx = event.pageX - initialMouseX;
-var dy = event.pageY - initialMouseY;
-viewBoxX -= dx;
-viewBoxY -= dy;
-svg.attr("viewBox", viewBoxX + " " + viewBoxY + " " + svg.attr("width") + " " + svg.attr("height"));
-initialMouseX = event.pageX;
-initialMouseY = event.pageY;
-}
-});
-
-svg.on("mouseup", function() {
-isPanning = false;
-svg.style("cursor", "auto");
-});
-
-// Create a div for the tooltip
-var tooltip = d3.select("body").append("div")
-.attr("class", "tooltip")
-.style("opacity", 0);
-
-let arrayLength = data.length; 
-
-// Find the maximum float value
-const maxFloat_X = findMaxFloat(map_data.Chemical_Space.x);
-const maxFloat_Y = findMaxFloat(map_data.Chemical_Space.y);
-
-// Create scales
-const xScale = d3.scaleLinear()
-.domain(d3.extent(data, d => parseFloat(d.Chemical_Space_x)))
-.range([0, width]);
-
-const yScale = d3.scaleLinear()
-.domain(d3.extent(data, d => parseFloat(d.Chemical_Space_y)))
-.range([height, 0]);
-
-let myScale_X = d3.scaleLinear()
-.domain([0, maxFloat_X])
-.range([0, 900]);
-
-let myScale_Y = d3.scaleLinear()
-.domain([0, maxFloat_Y])
-.range([0, 900]);
-
-var circles = svg.selectAll('circles')
-.data(data) 
-.enter()
-.append('circle');
-
-var circleAttributes = circles
-.attr('cx', function(d){return findCoordinateX(d.Smiles_GNPS_results, map_data);})
-.attr('cy', function(d){return findCoordinateY(d.Smiles_GNPS_results, map_data);})
-.attr('r', 8) 
-.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-.style('stroke', 'black') // Default border color
-.style('stroke-width', 2) // Default border width
-.on("mouseover", function(event, d) {
-
-   var mouseX = event.pageX;
-   var mouseY = event.pageY;
-   
-   var currentIndex = d.index;
-
-   circles.filter(function(e) {
-
-       return e.index === currentIndex;
-
-   })
-   .style('strokewidth', 8)
-   .style('stroke', 'red')
-
-   var currentIndex = d.index;
-
-   rectangles.filter(function(e) {
-           return e.index === currentIndex;
-       })
-.style("stroke", "red") // Change border color to red
-.style("stroke-width", 4); // Increase border width
-
-tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                           "<br> MassDiff: " + d.MassDiff_GNPS_results + 
-                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                           "<br> Class: " + d.cf_class_ms2query_results)
-               .style("left", (mouseX + 10) + "px")
-               .style("top", (mouseY + 10) + "px"); 
-
-               // Create a container element inside the tooltip for the SVG
-           var svgContainer = tooltip.append("div").attr("class", "svg-container");
-
-   var svgSmiles = svgContainer.append("svg")
-       .attr("id", "svgExample")
-       .attr("width", 200)
-       .attr("height", 150);
-
-   // Initialize SmiDrawer and draw the molecule
-   let moleculeOptions = {};
-   let reactionOptions = {};
-   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-           })
-.on("mouseout", function() {
-
-   circles.style('stroke', 'black') // Default border color
-       .style('stroke-width', 2) // Default border width
-   rectangles.style("stroke", "black") // Reset border color to black
-       .style("stroke-width", 1); // Reset border width
-
-   tooltip.transition()
-       .duration(500)
-       .style("opacity", 0);
-})
-
-.on("click", function(event, d){
-
-var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                       " MassDiff: " + d.MassDiff_GNPS_results + 
-                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                       " Super Class: " + d.cf_superclass_ms2query_results+ 
-                       " Class: " + d.cf_class_ms2query_results+
-                       " SMILES: " + d.smiles_ms2query_results+
-                       "InChIKey: " + d.inchikey_ms2query_results;
-
-navigator.clipboard.writeText(textToCopy)
-
-.then(() => {
-// Show popup
-var popup = d3.select("#popup");
-popup.classed("hidden", false);
-
-// Hide popup after 2 seconds
-setTimeout(function() {
-   popup.classed("hidden", true);
-}, 2000);
-})
-.catch(err => {
-console.error('Failed to copy text to clipboard:', err);
-});
-
-});
-
-svg2.append('text')
-.attr("x", 20)
-.attr("y", 30)
-.attr("font-size", "20px")
-.attr("font-family", "Arial")
-.attr("fill", "black")
-.text("Sample 1");
-
-svg2.append('text')
-.attr("x", 20 + (svg2.attr("width") / 3))
-.attr("y", 30)
-.attr("font-size", "20px")
-.attr("font-family", "Arial")
-.attr("fill", "black")
-.text("Sample 2");
-
-svg2.append('text')
-.attr("x", 20 + (svg2.attr("width") / 3)*2)
-.attr("y", 30)
-.attr("font-size", "20px")
-.attr("font-family", "Arial")
-.attr("fill", "black")
-.text("Sample 3");
-
-var changeColorButton = document.getElementById("option2");
-changeColorButton.addEventListener("click", function() {
-
-rectangles.style("fill", function(d){
-
-   return scale(d.ms2query_model_prediction_ms2query_results)
-
-})
-circles.style("fill", function(d){
-
-   return scale(d.ms2query_model_prediction_ms2query_results)
-
-})
-
-});
-
-var changeColorButton2 = document.getElementById("option1");
-changeColorButton2.addEventListener("click", function() {
-
-rectangles.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-circles.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-
-});
-
-
-
-var changeSortingButton = document.getElementById("optionSort2");
-
-// Hieer glaube ich 
-
-
-
-changeSortingButton.addEventListener("click", function(){
-
-changeColorButton.addEventListener("click", function() {
-
-       rectangles.style("fill", function(d){
-
-           return scale(d.ms2query_model_prediction_ms2query_results)
-
-       })
-       circles.style("fill", function(d){
-
-           return scale(d.ms2query_model_prediction_ms2query_results)
-
-       })
-
-});
-
-changeColorButton2.addEventListener("click", function() {
-
-       rectangles.style("fill", function(d) { 
-           return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-       })
-       circles.style("fill", function(d) { 
-           return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-       })
-
-});
-
-svg2.selectAll("*").remove();
-
-svg2.append('text')
-.attr("x", 20)
-.attr("y", 30)
-.attr("font-size", "20px")
-.attr("font-family", "Arial")
-.attr("fill", "black")
-.text("Sample 1");
-
-svg2.append('text')
-   .attr("x", 20 + (svg2.attr("width") / 3))
-   .attr("y", 30)
-   .attr("font-size", "20px")
-   .attr("font-family", "Arial")
-   .attr("fill", "black")
-   .text("Sample 2");
-
-svg2.append('text')
-   .attr("x", 20 + (svg2.attr("width") / 3)*2)
-   .attr("y", 30)
-   .attr("font-size", "20px")
-   .attr("font-family", "Arial")
-   .attr("fill", "black")
-   .text("Sample 3");
-
-var rectangles = svg2.selectAll('rects')
-.data(data)
-.enter()
-.append('rect');
-
-var rectangleAttributes = rectangles
-.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-.attr("y", function(d) { return 40 + d.heat_index * 12; })
-.attr("width", (svg2.attr("width") / 3) -40)
-.attr("height", 9)
-.style("stroke", "black") 
-.style("stroke-width", 1) 
-.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-.on("mouseover", function(event, d) {
-
-   var mouseX = event.pageX;
-   var mouseY = event.pageY;
-   
-   var currentIndex = d.index;
-
-   circles.filter(function(e) {
-
-       return e.index === currentIndex;
-
-   })
-   .style('strokewidth', 4)
-   .style('stroke', 'red')
-
-   var currentIndex = d.index;
-   rectangles.filter(function(e) {
-           return e.index === currentIndex;
-       })
-.style("stroke", "red") // Change border color to red
-.style("stroke-width", 4); // Increase border width
-
-// Show tooltip
-tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                           "<br> MassDiff : " + d.MassDiff_GNPS_results + 
-                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                           "<br> Class: " + d.cf_class_ms2query_results)
-                           .style("left", function() {
-
-if (mouseX > window.innerWidth / 2) {
-   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-} else {
-   return (mouseX + 10) + "px";
-}
-})
-.style("top", function() {
-
-if (mouseY > window.innerHeight / 2) {
-   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-} else {
-   return (mouseY + 10) + "px";
-}
-}); 
-
-               // Create a container element inside the tooltip for the SVG
-           var svgContainer = tooltip.append("div").attr("class", "svg-container");
-
-   var svgSmiles = svgContainer.append("svg")
-       .attr("id", "svgExample")
-       .attr("width", 200)
-       .attr("height", 150);
-
-   // Initialize SmiDrawer and draw the molecule
-   let moleculeOptions = {};
-   let reactionOptions = {};
-   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-           })
-.on("mouseout", function() {
-
-   circles.style('stroke', 'black') // Default border color
-       .style('stroke-width', 2)
-   rectangles.style("stroke", "black") // Reset border color to black
-       .style("stroke-width", 1); // Reset border width
-
-   tooltip.transition()
-       .duration(500)
-       .style("opacity", 0);
-})
-.on("click", function(event, d){
-
-   var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                       " MassDiff: " + d.MassDiff_GNPS_results + 
-                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                       " Super Class: " + d.cf_superclass_ms2query_results+ 
-                       " Class: " + d.cf_class_ms2query_results+
-                       " SMILES: " + d.smiles_ms2query_results+
-                       "InChIKey: " + d.inchikey_ms2query_results;
-
-
-       navigator.clipboard.writeText(textToCopy)
-
-       .then(() => {
-       // Show popup
-       var popup = d3.select("#popup");
-       popup.classed("hidden", false);
-
-       // Hide popup after 2 seconds
-       setTimeout(function() {
-           popup.classed("hidden", true);
-       }, 2000);
-       })
-       .catch(err => {
-       console.error('Failed to copy text to clipboard:', err);
-       });
-
-       })}); 
-
-var sortingButton2 = document.getElementById("optionSort1"); 
-sortingButton2.addEventListener("click", function(){
-
-   changeColorButton.addEventListener("click", function() {
-
-       rectangles.style("fill", function(d){
-
-       return scale(d.ms2query_model_prediction_ms2query_results)
-
-   })
-   circles.style("fill", function(d){
-
-       return scale(d.ms2query_model_prediction_ms2query_results)
-
-   })
-
-   });
-
-changeColorButton2.addEventListener("click", function() {
-
-rectangles.style("fill", function(d) { 
-return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-circles.style("fill", function(d) { 
-return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-
-});
-
-svg2.selectAll("*").remove();
-
-svg2.append('text')
-   .attr("x", 20)
-   .attr("y", 30)
-   .attr("font-size", "20px")
-   .attr("font-family", "Arial")
-   .attr("fill", "black")
-   .text("Sample 1");
-
-svg2.append('text')
-   .attr("x", 20 + (svg2.attr("width") / 3))
-   .attr("y", 30)
-   .attr("font-size", "20px")
-   .attr("font-family", "Arial")
-   .attr("fill", "black")
-   .text("Sample 2");
-
-svg2.append('text')
-   .attr("x", 20 + (svg2.attr("width") / 3)*2)
-   .attr("y", 30)
-   .attr("font-size", "20px")
-   .attr("font-family", "Arial")
-   .attr("fill", "black")
-   .text("Sample 3");
-
-var rectangles = svg2.selectAll('rects')
-.data(data)
-.enter()
-.append('rect');
-
-var rectangleAttributes = rectangles
-.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) }) // Top-left corner x position
-.attr("y", function(d) { return 40 + d.index * 12; }) // Top-left corner y position
-.attr("width", (svg2.attr("width") / 3) -40)
-.attr("height", 9)
-.style("stroke", "black") // Border color
-.style("stroke-width", 1) // Border width
-.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-.on("mouseover", function(event, d) {
-
-   var mouseX = event.pageX;
-   var mouseY = event.pageY;
-   
-   var currentIndex = d.index;
-
-   circles.filter(function(e) {
-
-       return e.index === currentIndex;
-
-   })
-   .style('strokewidth', 4)
-   .style('stroke', 'red')
-
-   var currentIndex = d.index;
-   rectangles.filter(function(e) {
-           return e.index === currentIndex;
-       })
-.style("stroke", "red") // Change border color to red
-.style("stroke-width", 4); // Increase border width
-
-tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-           tooltip.html(   "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                           "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                           "<br> MassDiff: " + d.MassDiff_GNPS_results + 
-                           "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                           "<br> Super Class: "+d.cf_superclass_ms2query_results+ 
-                           "<br> Class: " + d.cf_class_ms2query_results)
-                           .style("left", function() {
-
-if (mouseX > window.innerWidth / 2) {
-   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-} else {
-   return (mouseX + 10) + "px";
-}
-})
-.style("top", function() {
-
-if (mouseY > window.innerHeight / 2) {
-   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-} else {
-   return (mouseY + 10) + "px";
-}
-}); 
-
-               // Create a container element inside the tooltip for the SVG
-           var svgContainer = tooltip.append("div").attr("class", "svg-container");
-
-   var svgSmiles = svgContainer.append("svg")
-       .attr("id", "svgExample")
-       .attr("width", 200)
-       .attr("height", 150);
-
-   // Initialize SmiDrawer and draw the molecule
-   let moleculeOptions = {};
-   let reactionOptions = {};
-   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-           })
-.on("mouseout", function() {
-
-   circles.style('stroke', 'black') // Default border color
-       .style('stroke-width', 2)
-   rectangles.style("stroke", "black") // Reset border color to black
-       .style("stroke-width", 1); // Reset border width
-
-   tooltip.transition()
-       .duration(500)
-       .style("opacity", 0);
-})
-});
-
-var rectangles = svg2.selectAll('rects')
-.data(data)
-.enter()
-.append('rect');
-
-var rectangleAttributes = rectangles
-.attr("x", function(d) { return 20 + d.file_index * (svg2.attr("width") / 3) })
-.attr("y", function(d) { return 40 + d.index * 12; })
-.attr("width", (svg2.attr("width") / 3) -40)
-.attr("height", 9)
-.style("stroke", "black")
-.style("stroke-width", 1)
-.style("fill", function(d) { 
-   return colorMap[d.cf_superclass_ms2query_results] || colorMap['default']; 
-})
-.on("mouseover", function(event, d) {
-
-               var mouseX = event.pageX;
-               var mouseY = event.pageY;
-               
-               var currentIndex = d.index;
-
-               circles.filter(function(e) {
-
-                   return e.index === currentIndex;
-
-               })
-               .style('strokewidth', 4)
-               .style('stroke', 'red')
-
-               var currentIndex = d.index;
-               rectangles.filter(function(e) {
-                       return e.index === currentIndex;
-                   })
-           .style("stroke", "red")
-           .style("stroke-width", 4);
-
-           tooltip.transition()
-.duration(200)
-.style("opacity", .9);
-tooltip.html("Query Spectrum Nr: " + d.query_spectrum_nr + 
-    "<br> Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-    "<br> MassDiff: " + d.MassDiff_GNPS_results + 
-    "<br> NPC Pathway: " + d.npc_pathway_results_ms2query_results +
-    "<br> Super Class: " + d.cf_superclass_ms2query_results + 
-    "<br> Class: " + d.cf_class_ms2query_results)
-.style("left", function() {
-
-if (mouseX > window.innerWidth / 2) {
-   return (mouseX - tooltip.node().offsetWidth - 10) + "px";
-} else {
-   return (mouseX + 10) + "px";
-}
-})
-.style("top", function() {
-
-if (mouseY > window.innerHeight / 2) {
-   return (mouseY - tooltip.node().offsetHeight - 10) + "px";
-} else {
-   return (mouseY + 10) + "px";
-}
-}); 
-
-               
-   var svgContainer = tooltip.append("div").attr("class", "svg-container");
-
-   var svgSmiles = svgContainer.append("svg")
-       .attr("id", "svgExample")
-       .attr("width", 200)
-       .attr("height", 150);
-
-   let moleculeOptions = {};
-   let reactionOptions = {};
-   let sd = new SmiDrawer(moleculeOptions, reactionOptions);
-   sd.draw(d.Smiles_GNPS_results, svgSmiles.node(), 'light');
-           })
-.on("mouseout", function() {
-
-   circles.style('stroke', 'black') 
-       .style('stroke-width', 2) 
-   rectangles.style("stroke", "black") 
-       .style("stroke-width", 1); 
-
-   tooltip.transition()
-       .duration(500)
-       .style("opacity", 0);
-})
-.on("click", function(event, d){
-
-   var textToCopy =  "Query Spectrum Nr: " + d.query_spectrum_nr + 
-                       " Spectrum ID: " + d.spectrum_ids_ms2query_results + 
-                       " MassDiff: " + d.MassDiff_GNPS_results + 
-                       " NPC Pathway: " + d.npc_pathway_results_ms2query_results+
-                       " Super Class: " + d.cf_superclass_ms2query_results+ 
-                       " Class: " + d.cf_class_ms2query_results+
-                       " SMILES: " + d.smiles_ms2query_results+
-                       "InChIKey: " + d.inchikey_ms2query_results;
-
-   
-   navigator.clipboard.writeText(textToCopy)
-
-   .then(() => {
-   // Show popup
-   var popup = d3.select("#popup");
-   popup.classed("hidden", false);
-
-   // Hide popup after 2 seconds
-   setTimeout(function() {
-       popup.classed("hidden", true);
-   }, 2000);
-})
-.catch(err => {
-   console.error('Failed to copy text to clipboard:', err);
-});
-
-})  
-
-});
-
-//["#1f77b4","#ff7f0e","#2ca02c","#d62728","#9467bd","#8c564b","#e377c2","#7f7f7f","#bcbd22","#17becf"]
-var colorMap = {
-"Organic nitrogen compounds": chroma('#1f77b4'),
-"Lipids and lipid-like molecules": chroma('#ff7f0e'),
-"Benzenoids": chroma('#2ca02c'),
-"Organic oxygen compounds": chroma('#d62728'),
-"Organic acids and derivatives": chroma('#9467bd'),
-"Phenylpropanoids and polyketides": chroma('#8c564b'),
-"Alkaloids and derivatives": chroma('#e377c2'),
-"Nucleosides, nucleotides, and analogues": chroma('#7f7f7f'),
-"Organoheterocyclic compounds": chroma('#bcbd22'),
-
-"default": "white"
-};
-
-var scale = chroma.scale(['yellow', 'red', 'black']);
-
-function findCoordinateX(smiles, Tmap){
-
-let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
-let coordinate = Tmap.Chemical_Space.x[index]; 
-return coordinate; 
-}
-
-function findCoordinateY(smiles, Tmap){
-
-let index = Tmap.Chemical_Space.labels.indexOf(smiles); 
-let coordinate = Tmap.Chemical_Space.y[index]; 
-return coordinate; 
-
-}
-
-function findMaxFloat(arr) {
-let max = -Infinity;
-for (let i = 0; i < arr.length; i++) {
-if (typeof arr[i] === 'number' && !isNaN(arr[i])) {
-if (arr[i] > max) {
-max = arr[i];
-}
-}
-}
-return max;
-}
-
-// javascript:(function(){var script=document.createElement('script');script.onload=function(){var stats=new Stats();document.body.appendChild(stats.dom);requestAnimationFrame(function loop(){stats.update();requestAnimationFrame(loop)});};script.src='https://mrdoob.github.io/stats.js/build/stats.min.js';document.head.appendChild(script);})()
-
-
-</script>
 </body>
 </html>
