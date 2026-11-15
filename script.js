@@ -26,7 +26,7 @@
     .interpolate(d3.interpolateLab).clamp(true);
 
   const SAMPLES = [0, 1, 2];
-  const sampleName = (i) => `Sample ${i + 1}`;
+  const sampleName = (i) => `S${i + 1}`;
 
   const state = { colorBy: "superclass", sortBy: "index", hover: null, selected: null };
 
@@ -240,29 +240,30 @@
   // =====================================================================
   function createMatrix(features) {
     const api = { onHover: () => {}, onClick: () => {} };
-    const margin = { top: 46, right: 14, bottom: 12, left: 14 };
-    const flagW = 34;
+    const margin = { top: 24, right: 12, bottom: 0 };
+    const RUG_LABEL = 12, RUG_W = 6, RUG_GAP = 6, COL_GAP = 2;
     const byIndex = new Map(features.map((f) => [f.index, f]));
     const cellsData = features.flatMap((f) => [...f.samples].map((s) => ({ f, s })));
     const sampleCounts = SAMPLES.map((s) => features.filter((f) => f.samples.has(s)).length);
 
-    const xCol = d3.scaleBand().domain(SAMPLES).paddingInner(0.1);
+    // Columns: fixed 2px gaps between samples.
+    let x0 = 0, x1 = 0, colW = 0;
+    const colX = (s) => x0 + s * (colW + COL_GAP);
     const yRow = d3.scaleBand().paddingInner(0.18);
 
     const root = matrixSvg.append("g");
     const header = root.append("g");
     const tracks = root.append("g");
+    const rugLabel = root.append("text").attr("class", "col-sub").text("map");
     const flags = root.append("g");
     const cellsG = root.append("g");
     const highlightRect = root.append("rect").attr("class", "row-highlight").style("display", "none");
     const selTick = root.append("rect").attr("class", "sel-tick").style("display", "none");
     const hit = root.append("rect").attr("fill", "transparent").style("cursor", "pointer");
 
-    let cells = cellsG.selectAll("rect").data(cellsData).join("rect")
-      .attr("class", (d) => "cell" + (d.f.superclass === UNCLASSIFIED ? " unclassified" : ""));
-
-    const mapFlags = flags.selectAll("circle")
-      .data(features.filter((f) => f.node >= 0)).join("circle")
+    const cells = cellsG.selectAll("rect").data(cellsData).join("rect").attr("class", "cell");
+    const mapFlags = flags.selectAll("rect")
+      .data(features.filter((f) => f.node >= 0)).join("rect")
       .attr("class", "map-flag");
 
     function order() {
@@ -274,47 +275,48 @@
     function layout(animate) {
       const rect = matrixSvg.node().getBoundingClientRect();
       const w = rect.width, h = rect.height;
-      xCol.range([margin.left + flagW, w - margin.right]);
+      const rugX = RUG_LABEL;
+      x0 = rugX + RUG_W + RUG_GAP;
+      x1 = w - margin.right;
+      colW = Math.max(1, (x1 - x0 - COL_GAP * (SAMPLES.length - 1)) / SAMPLES.length);
       yRow.domain(order()).range([margin.top, h - margin.bottom]);
+      const bodyH = Math.max(0, h - margin.top - margin.bottom);
 
-      header.selectAll("g.col").data(SAMPLES).join((enter) => {
-        const g = enter.append("g").attr("class", "col");
-        g.append("text").attr("class", "col-label");
-        g.append("text").attr("class", "col-sub");
-        return g;
+      header.selectAll("text.col-head").data(SAMPLES).join((enter) => {
+        const t = enter.append("text").attr("class", "col-head");
+        t.append("tspan").attr("class", "col-label");
+        t.append("tspan").attr("class", "col-sub").attr("dx", 6);
+        return t;
       })
-        .attr("transform", (s) => `translate(${xCol(s)},0)`)
-        .call((g) => g.select(".col-label").attr("y", 18).text(sampleName))
-        .call((g) => g.select(".col-sub").attr("y", 34).text((s) => `${sampleCounts[s]} features`));
+        .attr("x", colX).attr("y", 14)
+        .call((t) => t.select(".col-label").text((s) => `S${s + 1}`))
+        .call((t) => t.select(".col-sub").text((s) => `n=${sampleCounts[s]}`));
 
-      header.selectAll("text.flag-label").data([0]).join("text")
-        .attr("class", "col-sub flag-label")
-        .attr("x", margin.left + flagW / 2 - 6).attr("y", 34).attr("text-anchor", "middle")
-        .text("map");
+      rugLabel.attr("transform", `translate(${rugX - 3},${margin.top}) rotate(90)`);
 
       tracks.selectAll("rect").data(SAMPLES).join("rect")
         .attr("class", "track")
-        .attr("x", (s) => xCol(s)).attr("y", margin.top)
-        .attr("width", xCol.bandwidth()).attr("height", Math.max(0, h - margin.top - margin.bottom));
+        .attr("x", colX).attr("y", margin.top)
+        .attr("width", colW).attr("height", bodyH);
 
       const t = animate ? matrixSvg.transition().duration(600) : null;
       const target = (sel) => (t ? sel.transition(t) : sel);
+      const tickH = Math.max(1, yRow.bandwidth());
 
       target(cells)
-        .attr("x", (d) => xCol(d.s)).attr("width", xCol.bandwidth())
+        .attr("x", (d) => colX(d.s)).attr("width", colW)
         .attr("y", (d) => yRow(d.f.index)).attr("height", yRow.bandwidth());
 
       target(mapFlags)
-        .attr("cx", margin.left + flagW / 2 - 6)
-        .attr("cy", (f) => yRow(f.index) + yRow.bandwidth() / 2)
-        .attr("r", Math.min(2.5, yRow.bandwidth() / 2));
+        .attr("x", rugX).attr("width", RUG_W)
+        .attr("y", (f) => yRow(f.index) + (yRow.bandwidth() - tickH) / 2)
+        .attr("height", tickH);
 
-      hit.attr("x", margin.left).attr("y", margin.top)
-        .attr("width", Math.max(0, w - margin.left - margin.right))
-        .attr("height", Math.max(0, h - margin.top - margin.bottom));
+      hit.attr("x", 0).attr("y", margin.top)
+        .attr("width", Math.max(0, x1)).attr("height", bodyH);
 
       api.highlight();
-      api.select && api.select();
+      api.select();
     }
 
     function featureAt(event) {
@@ -333,20 +335,18 @@
     api.highlight = () => {
       const h = state.hover;
       if (h === null) { highlightRect.style("display", "none"); return; }
-      const pad = 1.5;
+      const pad = 1;
       highlightRect.style("display", null)
-        .attr("x", xCol.range()[0] - pad)
-        .attr("y", yRow(h) - pad)
-        .attr("width", xCol.range()[1] - xCol.range()[0] + 2 * pad)
-        .attr("height", yRow.bandwidth() + 2 * pad);
+        .attr("x", x0 - pad).attr("y", yRow(h) - pad)
+        .attr("width", x1 - x0 + 2 * pad).attr("height", yRow.bandwidth() + 2 * pad);
     };
     api.select = () => {
       const s = state.selected;
       selTick.style("display", s === null ? "none" : null);
       if (s === null) return;
-      selTick.attr("x", xCol.range()[1] + 3).attr("width", 6)
-        .attr("y", yRow(s) + yRow.bandwidth() / 2 - Math.max(2, yRow.bandwidth()) / 2)
-        .attr("height", Math.max(2, yRow.bandwidth()));
+      const th = Math.max(2, yRow.bandwidth());
+      selTick.attr("x", x1 + 3).attr("width", 6)
+        .attr("y", yRow(s) + (yRow.bandwidth() - th) / 2).attr("height", th);
     };
     api.sort = (animate) => layout(animate);
     api.resize = () => layout(false);

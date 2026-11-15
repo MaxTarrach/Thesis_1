@@ -109,7 +109,7 @@ button.link, .segmented button, .enc-card {
   cursor: pointer; text-align: left;
 }
 button.link:hover, .segmented button:hover { color: var(--ink); }
-.segmented { display: inline-flex; gap: var(--u); }
+.segmented { display: inline-flex; gap: 4px; }
 .segmented button[aria-checked="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
 button:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 
@@ -141,6 +141,7 @@ button:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 .track { fill: var(--absent); }
 .cell.unclassified { stroke: var(--sc-unclassified); stroke-width: 0.6; }
 .map-flag { fill: var(--ink); }
+.col-head { font-size: var(--fs-ui); }
 .hover-ring, .sel-ring { fill: none; stroke: var(--ink); pointer-events: none; }
 .sel-tick { fill: var(--ink); pointer-events: none; }
 .row-highlight { fill: none; stroke: var(--ink); stroke-width: 1; pointer-events: none; }
