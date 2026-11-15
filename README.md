@@ -97,22 +97,6 @@ The full demo dataset is available in [`metab.json`](https://raw.githubuserconte
 - [TMAP](https://tmap.gdb.tools/) for the library layout
 - [Vercel](https://vercel.com/) for hosting during the expert evaluation
 
-## Getting started
-
-The prototype is a static web page with no build step.
-
-```bash
-git clone https://github.com/MaxTarrach/Thesis_1.git
-cd Thesis_1
-
-# serve locally (any static server works)
-python3 -m http.server 8000
-```
-
-Then open `http://localhost:8000` in your browser.
-
-> A local server is recommended rather than opening `index.html` directly, because browsers usually block loading local JSON files over `file://`.
-
 ## Methodology
 
 The project follows Tamara Munzner's **Nested Design Model**:
@@ -143,15 +127,6 @@ The project follows Tamara Munzner's **Nested Design Model**:
 - Only the top analogue per compound is shown. Showing the top-k matches could reveal whether hits agree with each other.
 - The library layer is a static image for performance reasons. Making it interactive (for example with a canvas or WebGL renderer) is the main next step.
 - Future studies should reach more users, for example at conference workshops, including researchers without a programming background (41% of participants in one community survey).
-
-## Citation
-
-If you use or reference this work:
-
-```
-Tarrach, M. (2024). Entwurf und vergleichende Analyse interaktiver Datenvisualisierungskonzepte
-zur Erkundung komplexer biochemischer Proben. Master's thesis, Hochschule Düsseldorf.
-```
 
 ## Acknowledgements
 
