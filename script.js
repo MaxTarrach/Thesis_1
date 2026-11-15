@@ -28,7 +28,7 @@
   const SAMPLES = [0, 1, 2];
   const sampleName = (i) => `Sample ${i + 1}`;
 
-  const state = { colorBy: "superclass", sortBy: "index", hover: null };
+  const state = { colorBy: "superclass", sortBy: "index", hover: null, selected: null };
 
   const isHollow = (f) => state.colorBy === "superclass" && f.superclass === UNCLASSIFIED;
   const colorOf = (f) => state.colorBy === "superclass"
@@ -73,6 +73,8 @@
 
     document.getElementById("prov-samples").textContent = SAMPLES.length;
     document.getElementById("prov-ref").textContent = d3.format(",")(CS.x.length);
+    document.getElementById("map-caption").textContent =
+      `TMAP of ${d3.format(",")(CS.x.length)} reference compounds; ${onMap.length} matched analogues shown.`;
 
     buildLegends(features);
     const map = createMap(onMap);
@@ -86,7 +88,18 @@
       if (f && event) showTooltip(f, event); else hideTooltip();
     }
     map.onHover = matrix.onHover = setHover;
-    map.onClick = matrix.onClick = copyFeature;
+    // Click selects (ring on map, tick on matrix row) and copies; a second click or Esc clears.
+    function setSelected(f) {
+      state.selected = f ? f.index : null;
+      map.select();
+      matrix.select();
+    }
+    map.onClick = matrix.onClick = (f) => {
+      if (state.selected === f.index) { setSelected(null); return; }
+      setSelected(f);
+      copyFeature(f);
+    };
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") setSelected(null); });
 
     function recolor() { map.recolor(); matrix.recolor(); }
 
@@ -104,7 +117,10 @@
       matrix.sort(true);
     });
 
-    document.getElementById("reset-zoom").addEventListener("click", map.resetZoom);
+    d3.selectAll("[data-zoom]").on("click", function () {
+      const z = this.dataset.zoom;
+      if (z === "reset") map.resetZoom(); else map.zoomBy(z === "in" ? 1.5 : 1 / 1.5);
+    });
 
     window.addEventListener("resize", () => { map.resize(); matrix.resize(); });
   });
@@ -118,14 +134,15 @@
     const x = d3.scaleLinear().domain(tmapExtentX);
     const y = d3.scaleLinear().domain(tmapExtentY);
 
+    const R = 5;
+    const readout = document.getElementById("zoom-readout");
     const zoom = d3.zoom()
       .scaleExtent([0.8, 40])
       .on("zoom", (event) => {
         transform = event.transform;
         mapG.attr("transform", transform);
-        mapG.selectAll(".feature-dot")
-          .attr("r", 5.5 / transform.k)
-          .attr("stroke-width", 1.2 / transform.k);
+        readout.textContent = `${transform.k.toFixed(1)}×`;
+        sizeMarks();
         draw();
       });
     overlay.call(zoom).on("dblclick.zoom", null);
@@ -137,6 +154,22 @@
       .on("mouseenter mousemove", (event, f) => api.onHover(f, event))
       .on("mouseleave", () => api.onHover(null))
       .on("click", (event, f) => api.onClick(f));
+    const byIndex = new Map(onMap.map((f) => [f.index, f]));
+    const hoverRing = mapG.append("circle").attr("class", "hover-ring").style("display", "none");
+    const selRing = mapG.append("circle").attr("class", "sel-ring").style("display", "none");
+
+    // Marks keep a constant on-screen size while zooming.
+    function sizeMarks() {
+      const k = transform.k;
+      dots.attr("r", R / k).attr("stroke-width", (f) => (isHollow(f) ? 1.2 : 1) / k);
+      hoverRing.attr("r", (R + 2.5) / k).attr("stroke-width", 1 / k);
+      selRing.attr("r", (R + 3.5) / k).attr("stroke-width", 2 / k);
+    }
+    function placeRing(ring, index) {
+      const f = index === null ? null : byIndex.get(index);
+      ring.style("display", f ? null : "none");
+      if (f) ring.attr("cx", x(f.tx)).attr("cy", y(f.ty)).raise();
+    }
 
     function resize() {
       const rect = mapBody.getBoundingClientRect();
@@ -154,6 +187,8 @@
       y.range([oy + side, oy]);
 
       dots.attr("cx", (f) => x(f.tx)).attr("cy", (f) => y(f.ty));
+      placeRing(hoverRing, state.hover);
+      placeRing(selRing, state.selected);
       draw();
     }
 
@@ -182,17 +217,19 @@
       ctx.restore();
     }
 
-    api.recolor = () => dots.attr("fill", colorOf).classed("hollow", isHollow);
+    api.recolor = () => { dots.attr("fill", colorOf).classed("hollow", isHollow); sizeMarks(); };
     api.highlight = () => {
       const h = state.hover;
-      dots.classed("dim", (f) => h !== null && f.index !== h)
-        .attr("stroke-width", (f) => (f.index === h ? 2.5 : 1.2) / transform.k);
+      dots.classed("dim", (f) => h !== null && f.index !== h && f.index !== state.selected);
       if (h !== null) dots.filter((f) => f.index === h).raise();
+      placeRing(hoverRing, h);
+      placeRing(selRing, state.selected);
     };
+    api.select = () => placeRing(selRing, state.selected);
     api.resize = resize;
     api.resetZoom = () => overlay.transition().duration(400).call(zoom.transform, d3.zoomIdentity);
+    api.zoomBy = (factor) => overlay.transition().duration(250).call(zoom.scaleBy, factor);
 
-    dots.attr("r", 5.5).attr("stroke-width", 1.2);
     resize();
     api.recolor();
     return api;
@@ -218,6 +255,7 @@
     const flags = root.append("g");
     const cellsG = root.append("g");
     const highlightRect = root.append("rect").attr("class", "row-highlight").style("display", "none");
+    const selTick = root.append("rect").attr("class", "sel-tick").style("display", "none");
     const hit = root.append("rect").attr("fill", "transparent").style("cursor", "pointer");
 
     let cells = cellsG.selectAll("rect").data(cellsData).join("rect")
@@ -276,6 +314,7 @@
         .attr("height", Math.max(0, h - margin.top - margin.bottom));
 
       api.highlight();
+      api.select && api.select();
     }
 
     function featureAt(event) {
@@ -300,6 +339,14 @@
         .attr("y", yRow(h) - pad)
         .attr("width", xCol.range()[1] - xCol.range()[0] + 2 * pad)
         .attr("height", yRow.bandwidth() + 2 * pad);
+    };
+    api.select = () => {
+      const s = state.selected;
+      selTick.style("display", s === null ? "none" : null);
+      if (s === null) return;
+      selTick.attr("x", xCol.range()[1] + 3).attr("width", 6)
+        .attr("y", yRow(s) + yRow.bandwidth() / 2 - Math.max(2, yRow.bandwidth()) / 2)
+        .attr("height", Math.max(2, yRow.bandwidth()));
     };
     api.sort = (animate) => layout(animate);
     api.resize = () => layout(false);

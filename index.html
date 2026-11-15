@@ -23,14 +23,18 @@
     <section class="panel" id="panel-a" aria-labelledby="title-a">
       <div class="panel-head">
         <h2 id="title-a"><span class="fig-letter">A</span>Chemical space</h2>
-        <div class="panel-tools">
-          <button type="button" class="link" id="reset-zoom" data-zoom="reset">reset</button>
-        </div>
       </div>
       <div class="panel-body" id="map-body">
         <canvas id="map-canvas"></canvas>
         <svg id="map-overlay"></svg>
+        <div class="zoom-ctl">
+          <button type="button" class="link" data-zoom="in" aria-label="zoom in">+</button>
+          <button type="button" class="link" data-zoom="out" aria-label="zoom out">−</button>
+          <button type="button" class="link" data-zoom="reset" id="reset-zoom">reset</button>
+          <span id="zoom-readout">1.0×</span>
+        </div>
       </div>
+      <p class="caption" id="map-caption"></p>
     </section>
 
     <div class="col-right">
