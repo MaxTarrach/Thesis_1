@@ -2,6 +2,9 @@
 
 **Design and comparative analysis of interactive data visualization concepts for exploring complex biochemical samples**
 
+
+<img width="1438" height="699" alt="Screenshot 2026-11-15 at 13 53 05" src="https://github.com/user-attachments/assets/f5466587-98c5-49d9-898f-e1051254f715" />
+
 ---
 
 ## About the project
