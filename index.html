@@ -58,22 +58,17 @@
       <section class="panel" id="panel-c" aria-labelledby="title-c">
         <div class="panel-head">
           <h2 id="title-c"><span class="fig-letter">C</span>Colour</h2>
+          <div class="panel-tools">
+            <span id="enc-label">colour:</span>
+            <div class="enc-switch" role="radiogroup" aria-labelledby="enc-label">
+              <button type="button" role="radio" data-enc="superclass" aria-checked="true"><span class="enc-mark" aria-hidden="true"></span>superclass</button>
+              <button type="button" role="radio" data-enc="confidence" aria-checked="false"><span class="enc-mark" aria-hidden="true"></span>confidence</button>
+            </div>
+          </div>
         </div>
-        <div class="encoding-options" role="radiogroup" aria-labelledby="title-c">
-          <button type="button" class="enc-card" role="radio" data-enc="superclass" aria-checked="true">
-            <span class="enc-head">
-              <span class="enc-radio" aria-hidden="true"></span>
-              <span class="enc-name">superclass</span>
-            </span>
-            <span class="enc-body" id="legend-superclass"></span>
-          </button>
-          <button type="button" class="enc-card" role="radio" data-enc="confidence" aria-checked="false">
-            <span class="enc-head">
-              <span class="enc-radio" aria-hidden="true"></span>
-              <span class="enc-name">confidence</span>
-            </span>
-            <span class="enc-body" id="legend-confidence"></span>
-          </button>
+        <div class="keys">
+          <div class="key" data-enc="superclass" id="legend-superclass"></div>
+          <div class="key inactive" data-enc="confidence" id="legend-confidence"></div>
         </div>
       </section>
     </div>

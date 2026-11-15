@@ -103,34 +103,39 @@ a { color: inherit; }
 }
 
 /* ---------- text controls ---------- */
-button.link, .segmented button, .enc-card {
+button.link, .segmented button, .enc-switch button {
   font: inherit; color: var(--ink-2);
   background: none; border: 0; padding: 0; margin: 0;
-  cursor: pointer; text-align: left;
+  cursor: pointer;
 }
-button.link:hover, .segmented button:hover { color: var(--ink); }
+button.link:hover, .segmented button:hover, .enc-switch button:hover { color: var(--ink); }
 .segmented { display: inline-flex; gap: 4px; }
 .segmented button[aria-checked="true"] { color: var(--ink); text-decoration: underline; text-underline-offset: 2px; }
 button:focus-visible { outline: 1px dotted var(--ink); outline-offset: 2px; }
 
-/* ---------- colour key ---------- */
-.encoding-options { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--gutter); min-height: 0; overflow: hidden; }
-.enc-card { display: flex; flex-direction: column; gap: var(--u); color: var(--ink); }
-.enc-card[aria-checked="false"] { opacity: 0.4; }
-.enc-head { display: flex; align-items: baseline; gap: var(--u); }
-.enc-radio::before { content: "○"; }
-.enc-card[aria-checked="true"] .enc-radio::before { content: "●"; }
-.enc-name { font-weight: 600; }
-.enc-body { display: block; }
+/* ---------- panel C: colour key ---------- */
+.enc-switch { display: inline-flex; gap: 10px; }
+.enc-switch button[aria-checked="true"] { color: var(--ink); }
+.enc-mark::before { content: "○"; margin-right: 4px; }
+.enc-switch button[aria-checked="true"] .enc-mark::before { content: "●"; }
 
-.swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px var(--gutter); }
-.swatch { display: flex; align-items: center; gap: var(--u); min-width: 0; }
+.keys { display: grid; grid-template-columns: minmax(0, 440px) 180px; justify-content: space-between; gap: var(--gutter); min-height: 0; }
+.key { cursor: pointer; transition: opacity 0.1s; }
+.key.inactive { opacity: 0.4; }
+.key.inactive:hover { opacity: 0.7; }
+@media (max-width: 900px) { .keys { grid-template-columns: 1fr; } }
+
+.swatches { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px var(--gutter); }
+.swatch { display: flex; align-items: center; gap: 6px; min-width: 0; }
 .swatch i { width: 8px; height: 8px; flex-shrink: 0; }
+.swatch i.hollow { box-shadow: inset 0 0 0 1px var(--sc-unclassified); }
 .swatch .label { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .swatch .count { margin-left: auto; color: var(--ink-2); }
 
 .ramp { display: block; overflow: visible; }
 .ramp text { font-size: var(--fs-note); fill: var(--ink-2); font-family: var(--font); }
+.ramp .tick line { stroke: var(--ink-2); }
+.ramp .bracket { fill: none; stroke: var(--ink); stroke-width: 1; }
 
 /* ---------- marks ---------- */
 .feature-dot { stroke: var(--paper); cursor: pointer; }

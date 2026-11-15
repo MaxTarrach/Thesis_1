@@ -103,12 +103,14 @@
 
     function recolor() { map.recolor(); matrix.recolor(); }
 
-    // Colour encoding (legend cards double as the switch)
-    d3.selectAll(".enc-card").on("click", function () {
-      state.colorBy = this.dataset.enc;
-      d3.selectAll(".enc-card").attr("aria-checked", function () { return this.dataset.enc === state.colorBy; });
+    // Colour encoding: the switch and the keys themselves both select it.
+    function setColorBy(enc) {
+      state.colorBy = enc;
+      d3.selectAll(".enc-switch [data-enc]").attr("aria-checked", function () { return this.dataset.enc === enc; });
+      d3.selectAll(".key").classed("inactive", function () { return this.dataset.enc !== enc; });
       recolor();
-    });
+    }
+    d3.selectAll("[data-enc]").on("click", function () { setColorBy(this.dataset.enc); });
 
     // Matrix sort (only affects the matrix, so it lives in the matrix header)
     d3.selectAll("[data-sort]").on("click", function () {
@@ -292,7 +294,7 @@
         .call((t) => t.select(".col-label").text((s) => `S${s + 1}`))
         .call((t) => t.select(".col-sub").text((s) => `n=${sampleCounts[s]}`));
 
-      rugLabel.attr("transform", `translate(${rugX - 3},${margin.top}) rotate(90)`);
+      rugLabel.attr("transform", `translate(${rugX - 11},${margin.top}) rotate(90)`);
 
       tracks.selectAll("rect").data(SAMPLES).join("rect")
         .attr("class", "track")
@@ -361,42 +363,43 @@
   // =====================================================================
   function buildLegends(features) {
     const counts = d3.rollup(features, (v) => v.length, (f) => f.superclass);
-    const sw = d3.select("#legend-superclass").append("span").attr("class", "swatches");
-    const items = sw.selectAll(".swatch")
-      .data([...SUPERCLASS_COLORS].filter(([name]) => counts.has(name)))
-      .join("span").attr("class", "swatch");
-    items.append("i").style("background", ([, c]) => c);
-    items.append("span").attr("class", "label").text(([name]) => name).attr("title", ([name]) => name);
-    items.append("span").attr("class", "count").text(([name]) => counts.get(name));
+    const items = d3.select("#legend-superclass").append("div").attr("class", "swatches")
+      .selectAll(".swatch")
+      .data(SUPERCLASSES.filter((s) => counts.has(s.name)))
+      .join("div").attr("class", "swatch").attr("title", (s) => s.name);
+    items.append("i")
+      .classed("hollow", (s) => s.name === UNCLASSIFIED)
+      .style("background", (s) => SUPERCLASS_COLORS.get(s.name));
+    items.append("span").attr("class", "label").text((s) => s.short);
+    items.append("span").attr("class", "count").text((s) => counts.get(s.name));
 
     drawRamp(features);
-    window.addEventListener("resize", () => drawRamp(features));
   }
 
-  // Continuous ramp with axis and the observed data range, drawn at true pixel size.
+  // 160×6 ramp, ticks at 0 / 0.5 / 1, bracket under the observed min–max.
   function drawRamp(features) {
-    const host = d3.select("#legend-confidence");
-    host.selectAll("*").remove();
-    const W = Math.max(160, host.node().getBoundingClientRect().width), H = 50, m = { l: 8, r: 12 };
-    const svg = host.append("svg").attr("class", "ramp").attr("width", W).attr("height", H);
+    const BAR_W = 160, BAR_H = 6, m = 6;
+    const svg = d3.select("#legend-confidence").append("svg")
+      .attr("class", "ramp").attr("width", BAR_W + 2 * m).attr("height", 44);
     const gid = "conf-gradient";
     const grad = svg.append("defs").append("linearGradient").attr("id", gid);
     d3.range(0, 1.0001, 0.1).forEach((t) => grad.append("stop").attr("offset", t).attr("stop-color", confidenceColor(t)));
 
-    const sx = d3.scaleLinear().domain([0, 1]).range([m.l, W - m.r]);
+    const sx = d3.scaleLinear().domain([0, 1]).range([m, m + BAR_W]);
     const [lo, hi] = d3.extent(features, (f) => f.confidence);
 
-    svg.append("rect").attr("x", sx(0)).attr("y", 18).attr("width", sx(1) - sx(0)).attr("height", 12)
-      .attr("fill", `url(#${gid})`).attr("stroke", "rgba(0,0,0,0.25)");
-    svg.append("g").attr("transform", "translate(0,30)")
-      .call(d3.axisBottom(sx).ticks(5).tickSize(4).tickFormat(d3.format(".1f")))
+    svg.append("rect").attr("x", sx(0)).attr("y", 0).attr("width", BAR_W).attr("height", BAR_H)
+      .attr("fill", `url(#${gid})`);
+    svg.append("g").attr("transform", `translate(0,${BAR_H})`)
+      .call(d3.axisBottom(sx).tickValues([0, 0.5, 1]).tickSize(3).tickPadding(2).tickFormat(d3.format("~g")))
       .call((g) => g.select(".domain").remove())
-      .call((g) => g.selectAll("line").attr("stroke", "#999"));
+      .call((g) => g.attr("font-family", null).attr("font-size", null));
 
-    svg.append("path")
-      .attr("d", `M${sx(lo)},16 V11 H${sx(hi)} V16`).attr("fill", "none").attr("stroke", "#6b6b66");
-    svg.append("text").attr("x", (sx(lo) + sx(hi)) / 2).attr("y", 8).attr("text-anchor", "middle")
-      .text(`observed in data: ${d3.format(".2f")(lo)}–${d3.format(".2f")(hi)}`);
+    const by = 26;
+    svg.append("path").attr("class", "bracket").attr("d", `M${sx(lo)},${by} V${by + 3} H${sx(hi)} V${by}`);
+    svg.append("text").attr("x", (sx(lo) + sx(hi)) / 2).attr("y", by + 14).attr("text-anchor", "middle")
+      .text("observed")
+      .append("title").text(`observed ${d3.format(".2f")(lo)}–${d3.format(".2f")(hi)}`);
   }
 
   // =====================================================================
