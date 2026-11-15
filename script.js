@@ -5,21 +5,25 @@
   "use strict";
 
   // ---------- encodings ----------
+  // Colours come from the CSS tokens in style.css (:root).
   const UNCLASSIFIED = "Unclassified";
-  const SUPERCLASS_COLORS = new Map([
-    ["Organic nitrogen compounds", "#1f77b4"],
-    ["Lipids and lipid-like molecules", "#ff7f0e"],
-    ["Benzenoids", "#2ca02c"],
-    ["Organic oxygen compounds", "#d62728"],
-    ["Organic acids and derivatives", "#9467bd"],
-    ["Phenylpropanoids and polyketides", "#8c564b"],
-    ["Alkaloids and derivatives", "#e377c2"],
-    ["Nucleosides, nucleotides, and analogues", "#7f7f7f"],
-    ["Organoheterocyclic compounds", "#bcbd22"],
-    [UNCLASSIFIED, "#ffffff"],
-  ]);
-  // Same ramp as the original chroma.scale(['yellow','red','black']) over [0, 1].
-  const confidenceColor = d3.scaleLinear().domain([0, 0.5, 1]).range(["#ffff00", "#ff0000", "#000000"]).clamp(true);
+  const SUPERCLASSES = [
+    { name: "Lipids and lipid-like molecules", short: "lipids", token: "--sc-lipids" },
+    { name: "Organic acids and derivatives", short: "organic acids", token: "--sc-acids" },
+    { name: "Phenylpropanoids and polyketides", short: "phenylpropanoids", token: "--sc-phenylpropanoids" },
+    { name: "Benzenoids", short: "benzenoids", token: "--sc-benzenoids" },
+    { name: "Organoheterocyclic compounds", short: "organoheterocyclics", token: "--sc-organoheterocyclic" },
+    { name: "Organic nitrogen compounds", short: "organic nitrogen", token: "--sc-nitrogen" },
+    { name: "Organic oxygen compounds", short: "organic oxygen", token: "--sc-oxygen" },
+    { name: "Nucleosides, nucleotides, and analogues", short: "nucleosides", token: "--sc-nucleosides" },
+    { name: "Alkaloids and derivatives", short: "alkaloids", token: "--sc-alkaloids" },
+    { name: UNCLASSIFIED, short: "unclassified", token: "--sc-unclassified" },
+  ];
+  const SUPERCLASS_COLORS = new Map(SUPERCLASSES.map((s) => [s.name, getCss(s.token)]));
+  SUPERCLASS_COLORS.set(UNCLASSIFIED, getCss("--paper")); // hollow: paper fill, ring stroke
+  const confidenceColor = d3.scaleLinear().domain([0, 1])
+    .range([getCss("--conf-lo"), getCss("--conf-hi")])
+    .interpolate(d3.interpolateLab).clamp(true);
 
   const SAMPLES = [0, 1, 2];
   const sampleName = (i) => `Sample ${i + 1}`;

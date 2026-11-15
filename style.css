@@ -1,19 +1,52 @@
 :root {
+  /* base */
+  --paper: #ffffff;
+  --ink: #111111;
+  --ink-2: #666666;
+  --rule: #dddddd;
+  --tree: #cfcfcf;
+  --absent: #f4f4f4;
+
+  /* ClassyFire superclass */
+  --sc-lipids: #d08c2b;
+  --sc-acids: #3f7f9e;
+  --sc-phenylpropanoids: #8a5a44;
+  --sc-benzenoids: #5e9c56;
+  --sc-organoheterocyclic: #9c7bb5;
+  --sc-nitrogen: #2f4b8a;
+  --sc-oxygen: #c2504a;
+  --sc-nucleosides: #4fa3a0;
+  --sc-alkaloids: #d47fa6;
+  --sc-unclassified: #333333; /* drawn as a hollow ring */
+
+  /* MS2Query confidence, single-hue sequential */
+  --conf-lo: #e9e4d4;
+  --conf-hi: #0d3b4c;
+
+  /* type + spacing */
+  --font: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-title: "Source Serif 4", Charter, Georgia, serif;
+  --mono: ui-monospace, Menlo, Consolas, monospace;
+  --fs-note: 11px;
+  --fs-ui: 12px;
+  --fs-panel: 13px;
+  --fs-title: 15px;
+  --u: 8px;
+  --gutter: 16px;
+
+  /* legacy aliases, removed in the chrome/layout steps */
   --bg: #e9ecef;
-  --surface: #ffffff;
+  --surface: var(--paper);
   --surface-alt: #f5f7f9;
-  --border: #cfd5dc;
-  --border-strong: #a9b2bd;
-  --text: #1f2933;
-  --text-muted: #5f6b78;
+  --border: var(--rule);
+  --border-strong: #b5b5b5;
+  --text: var(--ink);
+  --text-muted: var(--ink-2);
   --accent: #2b4c7e;
-  --accent-soft: #e6ecf5;
-  --track: #eef1f4;
-  --map-edge: rgba(96, 108, 122, 0.32);
-  --map-node: rgba(84, 96, 110, 0.5);
+  --track: var(--absent);
+  --map-edge: var(--tree);
+  --map-node: var(--tree);
   --radius: 2px;
-  --font: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 
 * { box-sizing: border-box; }
@@ -39,7 +72,7 @@ body {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
 }
-.app-header h1 {
+.app-header h1 { font-family: var(--font-title);
   font-size: 16px; font-weight: 600; margin: 0;
   letter-spacing: 0.04em;
   padding-right: 16px;
